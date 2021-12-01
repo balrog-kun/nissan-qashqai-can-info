@@ -28,7 +28,7 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 
 | Frame | Position in frame | Meaning | Format | Unit |
 | --: | --- | --- | --- | --- |
-| 002 | `A.8-B.1` | Steering wheel angle | 2's complement 16-bit integer, positive values in right turn, negative in left turn, 0 when straight, range of about -6000 to 6000 | 0.1 degree / LSB |
+| 002 | `A.8-B.1` | Steering wheel angle | 2's complement 16-bit integer, little-endian, positive values in right turn, negative in left turn, range of about -6000 to 6000 | 0.1 degree / LSB |
 | 002 | `C.8-1`   | Steering wheel rate (TODO) |||
 | 002 | `E.8-1`   | Message serial/timestamp | unsigned integer ||
 ||
