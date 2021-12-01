@@ -75,6 +75,14 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 | 358 | `F.2`     | Other-than-driver doors locked (even if some were unlocked manually) | boolean, 1 when locked ||
 | 358 | `F.1`     | Driver door locked | boolean, 1 when locked ||
 ||
+| 35d | `A.8`     | Ignition in ON | boolean, 1 when ON ||
+| 35d | `A.7`     | Ignition in half ON (TODO) |||
+| 35d | `A.6`     | Blower fan on (climate control) | boolean, 1 when fan running ||
+| 35d | `A.3`     | Rear defrost heating | boolean, 1 when on ||
+| 35d | `A.2`     | Rear defrost heating | boolean, 1 when on ||
+| 35d | `A.1`     | A/C on | boolean, 1 when on ||
+| 35d | `B.2`     | Dashboard power | boolean, 1 when on ||
+| 35d | `B.1`     | Dashboard power | boolean, 1 when on ||
 | 35d | `C.8`     | Wipers moving | boolean, 1 when moving ||
 | 35d | `C.7`     | Wipers moving | boolean, 1 when moving ||
 | 35d | `E.5`     | Brake pedal switch / brake light / stop light | boolean, 1 when foot on pedal ||
@@ -82,6 +90,7 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 | 551 | `A.8-1`   | Engine temperature | 8-bit unsigned integer, `0x75` at middle of gauge range | deg C / LSB? |
 | 551 | `B.8-1`   | Engine-related counter, rate proportional to revs, wraps at `0xff` | 8-bit integer | at idle increases at ~1.5 LSB / s |
 | 551 | `C.8-1`   | Some other temperature |||
+| 551 | `D.8-1`   | Possibly dashboard lights |||
 | 551 | `E.1`     | Cruise speed/limit speed being set | boolean, 1 if being set currently ||
 | 551 | `F.7-5`   || bitmap, `0b110` if setting cruise speed, `0b011` if limit speed, `0b001` if engaged? ||
 | 551 | `F.4`     | Engine running? | boolean, 1 when running ||
