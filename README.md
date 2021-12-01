@@ -15,12 +15,13 @@ is to automate the power mirrors folding and unfolding in my car.
 [tutorial](https://www.instructables.com/Build-an-Arduino-Into-a-Nissan-Qashqai-to-Automate/).
 
 ## Addressing
+
 I follow the bit addressing in [this doc](https://github.com/jackm/carhack/blob/master/nissan.md) where CAN bus
 message bytes in positions 1 to 8 are referenced by letters A-H and bits are numbered from 8th (MSB) to 1st (LSB).
 Bit M in byte N is represented by `N.M`, e.g. the lowest bit of the 3rd byte is `C.1` while the highest bit in
-byte 1 -- or the first bit of the entire messsages -- is `A.8`.
+byte 1 -- or the first bit of the entire messsages -- is `A.8`.  Frame IDs (PIDs) are hexadecimal.
 
-## Periodic frame data
+## Periodic data frames
 
 This lists individual values in the frames transmitted periodically by devices on the main CAN bus, i.e. frames
 that don't need to be requested.  Multi-byte values are encoded as big-endian except where noted.
@@ -32,8 +33,8 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 | 002 | `E.8-1`   | Message serial/timestamp | unsigned integer ||
 ||
 | 160 | `A.8-B.5` | Pressure somewhere in the engine | 12-bit unsigned integer | possibly mmHg |
-| 160 | `D.8-E.7` | Accelerator/throttle pedal position (soft-zone) | integer between 0 (depressed) and 792 (at or behind the stiff threshold) ||
-| 160 | `E.6`     | Accelerator/throttle pedal at stiff threshold | boolean, 1 if at or behind threshold ||
+| 160 | `D.8-E.7` | Accelerator/throttle pedal position (soft-zone) | integer between 0 (depressed) and 792 (at or behind the stiff-zone threshold) ||
+| 160 | `E.6`     | Accelerator/throttle pedal at stiff-zone threshold | boolean, 1 if at or behind threshold ||
 | 160 | `G.8-H.7` | Same as `D.8-E.7` |||
 ||
 | 180 | `A.8-B.2` | Engine revolutions | 15-bit unsigned integer | 0.25 RPM / LSB (possibly 1/4.096) |
@@ -46,8 +47,8 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 | 280 | `B.5-D.5` | A rapidly changing sensor value |||
 | 280 | `F.8-G.1` | Logitudinal axis acceleration force | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
 ||
-| 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit integer, 0 when stopped, positive when rolling in either direction | 1/175th Km/h/LSB (7000 at 40kmh) |
-| 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit integer, 0 when stopped, positive when rolling in either direction | 1/175th Km/h/LSB (7000 at 40kmh) |
+| 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
+| 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
 | 284 | `E.8-1`   | Some related sensor data |||
 | 284 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
@@ -56,8 +57,8 @@ that don't need to be requested.  Multi-byte values are encoded as big-endian ex
 | 285 | `E.8-1`   | Some related sensor data |||
 | 285 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
-| 2a0 | `B.8-C.1` | Lateral axis acceleration force | unsigned 16-bit integer, 0x8000 in equilibrium, higher values when force towards right, i.e. when parked with right wheels lower or turning left (in forward or in reverse), < 0x8000 when parked with right wheels higher or turning right (in forward or in reverse) ||
-| 2a0 | `D.8-E.1` | Turn rate about vertical axis | unsigned 16-bit integer, 0x8000 no turn, higher values in left turn (right in reverse), < 0x8000 in right turn (left in reverse) ||
+| 2a0 | `B.8-C.1` | Lateral axis acceleration force | 16-bit unsigned integer, 0x8000 in equilibrium, higher values when force towards right, i.e. when parked with right wheels lower or turning left (in forward or in reverse), < 0x8000 when parked with right wheels higher or turning right (in forward or in reverse) ||
+| 2a0 | `D.8-E.1` | Turn rate about vertical axis | 16-bit unsigned integer, 0x8000 no turn, higher values in left turn (right in reverse), < 0x8000 in right turn (left in reverse) ||
 ||
 | 2de | `G.8-H.1` | Range at current fuel economy and fuel left (minus reserve, i.e. 0 km when fuel gauge in red zone), as shown on one of the dashboard panels | 16-bit unsigned integer | 0.1 km / LSB rounded to 1 km (10 LSBs) |
 ||
