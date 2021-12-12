@@ -14,7 +14,7 @@ Nissan Qashqai, unlike many other cars, only has one major CAN bus with between 
 the service manual schematics) or the comfort unit.  The service manuals refer to that bus as "CAN communication" or
 "CAN COMM".  There is one other isolated bus using the CAN protocol and it connects the Audio unit to the NAVI unit
 who is the master device on that bus.  That bus is referred to as "AV communication" or "AV COMM" in the service manuals.
-This file always refers to the main CAN bus.  Both busses run at 500kbps with 11-bit PIDs.
+This file always refers to the main CAN bus.  Both busses run at 500kbps with 11-bit addresses.
 
 I captured the data using an off-the-shelf ESP32 board with an SN65HVD230 CAN transciever who's main function
 is to automate the power mirrors folding and unfolding in my car.
@@ -26,7 +26,7 @@ is to automate the power mirrors folding and unfolding in my car.
 This file follows the bit addressing in [this doc](https://github.com/jackm/carhack/blob/master/nissan.md) where CAN
 bus message bytes in positions 1 to 8 are referenced by letters A-H and bits are numbered from 8th (MSB) to 1st (LSB).
 Bit M in byte N is represented by `N.M`, e.g. the lowest bit of the 3rd byte is `C.1` while the highest bit in
-byte 1 -- or the first bit of the entire messsages -- is `A.8`.  Frame IDs (PIDs) are hexadecimal.
+byte 1 -- or the first bit of the entire messsages -- is `A.8`.  Frame IDs (addresses) are hexadecimal.
 
 ## Periodic data frames
 
@@ -42,7 +42,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 002 | `C.8-1`   | Steering wheel rate (TODO) |||
 | 002 | `E.8-1`   | Message serial/timestamp | unsigned integer ||
 ||
-| 160 | `A.8-B.5` | Pressure somewhere in the engine | 12-bit unsigned integer | possibly mmHg |
+| 160 | `A.8-B.5` | RPM rate of change or pressure somewhere in the engine > when revving up, < when revving down | 12-bit unsigned integer ||
 | 160 | `D.8-E.7` | Accelerator/throttle pedal position (soft zone, value remains at maximum when above 75% stroke, i.e. all stiff zone) | integer between 0 (released) and 792 (at or behind the stiff-zone threshold) ||
 | 160 | `E.6`     | Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if at or behind threshold ||
 | 160 | `G.8-H.7` | Same as `D.8-E.7` -- according to brad370 these two values are compared for error detection |||
@@ -60,12 +60,15 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 1f9 | `A.4`     | A/C on while engine running (after A/C off, goes to 0 before `A.7`) | boolean, 1 when true ||
 | 1f9 | `C.8-D.2` | Engine RPM, same as `180 / A.8-B.2` |||
 ||
+| 215 | `B.7`     | Reverse gear | boolean, 1 when in reverse ||
+||
 | 280 | `B.5-D.5` | A rapidly changing sensor value |||
-| 280 | `F.8-G.1` | Logitudinal axis acceleration force | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
+| 280 | `E.8-F.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
+| 280 | `F.8-G.1` | Fixme: Logitudinal axis acceleration force | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
 ||
 | 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
 | 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
-| 284 | `E.8-1`   | Some related sensor data |||
+| 284 | `E.8-F.1` | Total absolute speed | 16-bit unsigned integer ||
 | 284 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
 | 285 | `A.8-B.1` | Rear right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
@@ -79,12 +82,16 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 2de | `E.2`     | Efficiency unit is l/100km, as opposed to MPG or km/l | boolean, 1 when 1/100km ||
 | 2de | `G.8-H.1` | Distance-to-empty -- range at current fuel economy and fuel left (minus reserve, i.e. 0 km when fuel gauge in red zone), as shown on one of the dashboard panels | 16-bit unsigned integer | 0.1 km / LSB rounded to 1 km (10 LSBs) -- when efficiency unit set to l/100km |
 ||
+| 354 | `A.8-B.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
 | 354 | `E.7`     | ESP (VDC/TCS) disable button | boolean, 1 when button in ||
 | 354 | `E.6`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
 | 354 | `E.4`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
 | 354 | `E.3`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
 | 354 | `E.1`     | ABS? off dash light | boolean, 1 when light on ||
 | 354 | `G.5`     | Brake pedal switch / brake light / stop light | boolean, 1 when foot on pedal ||
+||
+| 355 | `A.8-B.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `C.8-D.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
 ||
 | 358 | `A.1`     | Key inserted | boolean, 1 when key in ignition ||
 | 358 | `B.7`     | Blower fan on (climate control) | boolean, 1 when fan running ||
@@ -161,6 +168,7 @@ Data available on some cars but not available on Nissan Qashqai J10 or to be yet
 * Outside temperature
 * Outside brightness level (bright/dark, from the Light & Rain sensor)
 * ASCD clutch switch
+* Current gear, gear up/down advice signal -- 19b byte E?
 * Seatbelt status and occupancy sensor status
 * Car VIN
 * Current time and/or data
