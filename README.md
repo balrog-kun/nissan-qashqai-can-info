@@ -70,13 +70,13 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 280 | `E.8-F.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
 | 280 | `G.8-1`   | A rapidly changing sensor value -- reacts to longitudinal axis acceleration | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
 ||
-| 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
-| 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
+| 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h / LSB (7000 at 40kmh) |
+| 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h / LSB (7000 at 40kmh) |
 | 284 | `E.8-F.1` | Vehicle absolute speed | 16-bit unsigned integer | 0.01 km/h / LSB (slightly lower) |
 | 284 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
-| 285 | `A.8-B.1` | Rear right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
-| 285 | `C.8-D.1` | Rear left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
+| 285 | `A.8-B.1` | Rear right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h / LSB (7000 at 40kmh) |
+| 285 | `C.8-D.1` | Rear left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h / LSB (7000 at 40kmh) |
 | 285 | `E.8-1`   | Vehicle absolute speed | 8-bit unsigned integer | km/h |
 | 285 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
@@ -115,7 +115,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 35d | `C.7`     | Wipers moving | boolean, 1 when moving ||
 | 35d | `E.5`     | Brake pedal switch / brake light / stop light | boolean, 1 when foot on pedal ||
 ||
-| 551 | `A.8-1`   | Engine coolant temperature | 8-bit unsigned integer, values in ºC + 40, `0x75` at middle of gauge range, '0x5b' bottom of range | deg C / LSB (service manual page MWI-27 says 215ºC is displayed in data monitor in case of malfunction, suggesting the raw 8-bit value received -- hypothetically `0xff` in the malfunction case -- is offset by 40 and taken directly as degrees Celcius between -40 and 215) |
+| 551 | `A.8-1`   | Engine coolant temperature | 8-bit unsigned integer, values in °C + 40, `0x75` at middle of gauge range, '0x5b' bottom of range | deg C / LSB (service manual page MWI-27 says 215ºC is displayed in data monitor in case of malfunction, suggesting the raw 8-bit value received -- hypothetically `0xff` in the malfunction case -- is offset by 40 and taken directly as degrees Celcius between -40 and 215) |
 | 551 | `B.8-1`   | Engine-related counter, rate proportional to revs, wraps at `0xff` -- fuel consumed? | 8-bit integer | at idle increases at ~1.5 LSB / s |
 | 551 | `C.4-1`   | Some sensor reading, changes gradually from `0x4` to `0xa` when blower fan spins up and back when it spins down but is independent of blower speed (may include all of `C.8-1`) | integer ||
 | 551 | `D.8-1`   | Possibly dashboard lights |||
@@ -163,6 +163,44 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 625 | `B.4`     | Front fog lights on | boolean, 1 when on (delayed?) ||
 | 625 | `C.7-1`   | Battery voltage (possibly Diesel-only) | 8-bit unsigned integer | 1/16th V / LSB, e.g. `0xc0` is 12V |
 
+## BCM diagnostic action PIDs (commands)
+
+## Standard service 01 PIDs (current data)
+
+This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.
+
+| PID | Meaning | Unit (formula to get physical value) | Captured value |
+| --: | --- | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ || 98 3b 80 11 |
+| 01 | Monitor status since DTCs cleared. | bitmap | 00 64 80 00 (Diesel engine, Components test incomplete, Fuel test incomplete, EGR System test available) |
+| 04 | Calculated engine load | % (100/255 A) | 00 |
+| 05 | Engine coolant temperature | °C (A-40) | 4d |
+| 0b | Intake manifold absolute pressure | kPa (A) | 5e |
+| 0c | Engine speed | rpm (1/4(256A+B)) | 00 50 |
+| 0d | Vehicle speed | km/h (A) | 00 |
+| 0f | Intake air temperature | °C (A-40) | 51 |
+| 10 | [Mass air flow sensor (MAF)](https://en.wikipedia.org/wiki/Mass_airflow_sensor) air flow rate | grams/sec (1/100(256A+B)) | 00 00 |
+| 11 | Throttle position | % (100/255 A) | 00 |
+| 1c | OBD standards this vehicle conforms to | enum | 06 (EOBD-Europe) |
+| 20 | _Supported PIDs 21-3f bitmask_ || a0 01 80 00 |
+| 21 | Distance traveled with malfunction indicator lamp (MIL) on | km (256A+B) | 00 00 |
+| 23 | [Fuel Rail](https://en.wikipedia.org/wiki/Fuel_rail) Gauge Pressure | kPa (10(256A+B))| 00 00 |
+| 30 | Warm-ups since codes cleared | count (A) | 13 |
+| 31 | Distance traveled since codes cleared | km (256A+B) | 03 7c |
+
+## Standard service 09 PIDs (vehicle information)
+
+As before this is the supported subset of the standard ECU service 09 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_09).  Any PIDs not listed here seem to be unsupported, i.e. very little is actually supported and the VIN query (02), while available, returns no data.  The other two PIDs have lengths that don't match the specs.
+
+| PID | Meaning | Value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | 54 00 00 00 |
+| 02 | [Vehicle Identification Number](https://en.wikipedia.org/wiki/Vehicle_Identification_Number) (VIN) | 01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff |
+| 04 | Calibration ID | 02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00 (23710BB31A 23701B36A) |
+| 06 | Calibration Verification Numbers (CVN) Several CVN can be output (4 bytes each) the number of CVN and CALID must match | 01 44 d8 62 a7 |
+
+## Non-standard service 22 PIDs
+
 ## Missing data
 
 Data available on some cars but not available on Nissan Qashqai J10 or to be yet decoded:
@@ -174,7 +212,3 @@ Data available on some cars but not available on Nissan Qashqai J10 or to be yet
 * Car VIN
 * Current time and/or data
 * Current GPS lat/lon/number of satellites
-
-## Command frames
-
-None yet
