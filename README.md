@@ -44,17 +44,19 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 ||
 | 160 | `A.8-B.5` | RPM rate of change or pressure somewhere in the engine > when revving up, < when revving down | 12-bit unsigned integer ||
 | 160 | `D.8-E.7` | Accelerator/throttle pedal position (soft zone, value remains at maximum when above 75% stroke, i.e. all stiff zone) | integer between 0 (released) and 792 (at or behind the stiff-zone threshold) ||
-| 160 | `E.6`     | Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if at or behind threshold ||
+| 160 | `E.6`     | WOT -- Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if at or behind threshold ||
 | 160 | `G.8-H.7` | Same as `D.8-E.7` -- according to brad370 these two values are compared for error detection |||
 ||
 | 161 | `A.8-1`   | Some sensor value, varies with engine RPMs |||
 | 161 | `B.8-1`   | Some voltage value, strictly goes down with electric current consumption (with a delay) when engine running, constant when stopped -- might be used for the idle RPM calcluation or similar |||
 | 161 | `C.8-1`   | Same as above but also goes up with engine RPMs -- roughly follows the sum of `A.8-1` and `B.8-1` |||
+| 161 | `D.1`     | WOT -- Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if behind threshold ||
+| 161 | `E.8-1`   | Accelerator/throttle pedal position (soft zone, value remains at maximum when above 75% stroke, i.e. all stiff zone) | integer between 0 (released) and 0xfc (at or behind the stiff-zone threshold) ||
 ||
 | 180 | `A.8-B.2` | Engine revolutions | 15-bit unsigned integer | 0.25 RPM / LSB (service manual page MWI-27 says 8191.875 is displayed in case of malfunction, implying that the whole 16-bit value of `A.8-B.1` -- hypothetically `0xffff` in that case -- is simply divided by 8 to get the RPMs) |
 ||
 | 19b | `A.8-5`   | Engine running status? |||
-| 19b | `C.8-D.5` | Fuel consumption | 16-bit unsigned integer ||
+| 19b | `C.8-D.1` | Related to fuel consumption, up when revving up, low at constant revs, 0 when revving down (doesn't match fuel consumption calculated from the l/100km efficiency indication on dashboard multiplied by current velocity though) | 16-bit unsigned integer ||
 | 19b | `E.8-5`   | Drive / reverse status? | `0b1111` for a moment after ignition switched to ON, `0b0000` when driving forward or stopped, `0b1001` in reverse, `0b0100` on cruise-control?, `0b0010` when gear-up request, `0b0101` when gear-down request ||
 | 19b | `F.8-G.1` | A rather stable sensor value | 16-bit unsigned integer ||
 ||
@@ -65,26 +67,26 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 215 | `B.7`     | Reverse gear / reverse light | boolean, 1 when in reverse ||
 ||
 | 280 | `B.8-D.5` | A rapidly changing sensor value -- reacts to longitudinal axis acceleration |||
-| 280 | `E.8-F.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
+| 280 | `E.8-F.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
 | 280 | `G.8-1`   | A rapidly changing sensor value -- reacts to longitudinal axis acceleration | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
 ||
 | 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
 | 284 | `C.8-D.1` | Front left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
-| 284 | `E.8-F.1` | Total absolute speed | 16-bit unsigned integer | 0.01 km/h / LSB (slightly lower) |
+| 284 | `E.8-F.1` | Vehicle absolute speed | 16-bit unsigned integer | 0.01 km/h / LSB (slightly lower) |
 | 284 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
 | 285 | `A.8-B.1` | Rear right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
 | 285 | `C.8-D.1` | Rear left wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h/LSB (7000 at 40kmh) |
-| 285 | `E.8-1`   | Total absolute speed | 8-bit unsigned integer | km/h |
+| 285 | `E.8-1`   | Vehicle absolute speed | 8-bit unsigned integer | km/h |
 | 285 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
 | 2a0 | `B.8-C.1` | Lateral axis acceleration force | 16-bit unsigned integer, 0x8000 in equilibrium, higher values when force towards right, i.e. when parked with right wheels lower or turning left (in forward or in reverse), < 0x8000 when parked with right wheels higher or turning right (in forward or in reverse) ||
 | 2a0 | `D.8-E.1` | Turn rate about vertical axis | 16-bit unsigned integer, 0x8000 no turn, higher values in left turn (right in reverse), < 0x8000 in right turn (left in reverse) ||
 ||
-| 2de | `E.2`     | Efficiency unit is l/100km, as opposed to MPG or km/l | boolean, 1 when 1/100km ||
+| 2de | `E.2`     | Efficiency unit is l/100km, as opposed to MPG or km/l | boolean, 1 when l/100km ||
 | 2de | `G.8-H.1` | Distance-to-empty -- range at current fuel economy and fuel left (minus reserve, i.e. 0 km when fuel gauge in red zone), as shown on one of the dashboard panels | 16-bit unsigned integer | 0.1 km / LSB rounded to 1 km (10 LSBs) -- when efficiency unit set to l/100km |
 ||
-| 354 | `A.8-B.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
+| 354 | `A.8-B.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
 | 354 | `E.7`     | ESP (VDC/TCS) disable button | boolean, 1 when button in ||
 | 354 | `E.6`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
 | 354 | `E.4`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
@@ -92,8 +94,8 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 354 | `E.1`     | ABS? off dash light | boolean, 1 when light on ||
 | 354 | `G.5`     | Brake pedal switch / brake light / stop light | boolean, 1 when foot on pedal ||
 ||
-| 355 | `A.8-B.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
-| 355 | `C.8-D.1` | Total absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `A.8-B.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `C.8-D.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
 ||
 | 358 | `A.1`     | Key inserted | boolean, 1 when key in ignition ||
 | 358 | `B.7`     | Blower fan on (climate control) | boolean, 1 when fan running ||
