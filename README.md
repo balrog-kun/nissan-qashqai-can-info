@@ -165,6 +165,50 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 
 ## BCM diagnostic action PIDs (commands)
 
+These are the BCM's service 0x30 PIDs that can be used to send commands and only send commands (there don't seem to be any useful queries).  The service listens on address **0x745** and replies on address **0x765** but it allows communication only [as documented by Brad370z here](https://projectbytes.wordpress.com/2015/07/08/nissan-370z-can-control/).
+
+These commands toggle the different lights, actuators, speakers and other devices connected to the BCM, plus it seems the BCM will automatically request power to the right rails on the car from the IPDM-E/R so that the commands mostly work even when the car is completely off.  The changes will time out after 5 seconds so these seem to be strictly diagnostic commands for quickly testing the different devices.  At the same time it seems the changes can be extended in time by resending the commands before the 5s run out.
+
+As documented by Brad370z each command consists of the service number `0x30`, the PID number, the function byte and the requested value.
+Three functions seem to available:
+
+| Function byte | Description |
+| --: | --- |
+| `0x00` | Sends a one-time command such as door unlocking.  Either this or `0x20` is supported by every PID, never both. |
+| `0x01` | Queries whether given value is supported by this PID.  Every PID supports this function |
+| `0x20` | Causes a temporary 5-second change to a device's state |
+
+Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the value 0 does nothing.  For function `0x20` the value 0 disables a device temporarily if it's on, and cancels a previously requested value that hasn't timed out yet.  For example if the left turn signal is currently blinking because the turn signal & wiper switch (stick/lever) is in the left position, requesting value will 1 will start blinking the right turn signal (and disable the left turn signal) for 5 seconds.  Requesting value 0 will disable either turn signal for 5s whether it was requested with the physical switch or a diagnostic command.
+
+| PID | Function (`0x00`/`0x20`) | Values |
+| --: | :-: | --- |
+| 00 | `00` | _Supported PIDs 01-1f bitmask_: 32 20 c6 81 |
+| 03 | `00` | 0: nothing, 1 & 2: _TODO_ -- beeps like the lock/unlock switch and a relay switch can be heard from the BCM |
+| 04 | `20` | 0, 1, 2: _TODO_ |
+| 07 | `00` | 0: nothing, 1: Lock car, 2: Unlock all door, 3: Unlock driver, 4: Unlock passenger |
+| 0b | `20` | 0: Rear window defogging (defrost) off for 5s, 1: Rear window defogging (defrost) on for 5s |
+| 11 | `20` | 0: Key beep off, 1: Key beep continuous tone for 5s |
+| 12 | `20` | 0: Key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
+| 16 | `20` | 0: key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
+| 17 | `20` | 0: Roof light on for 5s, 1: Roof light on for 5s (same?) |
+| 19 | `20` | 0: Roof light off, 1: Roof light on for 5s, 2: Roof light auto mode? in ACC on for 5s, in ON fade out and off for 5s |
+| 20 | `00` | _Supported PIDs 21-3f bitmask_: 84 00 00 6d |
+| 21 | `20` | 0: No-key dashboard light off for 5s, 1: No-key dashboard light on for 5s |
+| 26 | `00` | 0: nothing, 1: Trunk door open |
+| 3a | `20` | 0: Position/parking/side lights off for 5s, 1: Position/parking/side lights on for 5s |
+| 3b | `20` | 0: Low-/high-beam off for 5s, 1: Low-beam lights on for 5s, 2: High-beam lights on for 5s |
+| 3d | `20` | 0: Front fog lights off for 5s, 1: Front fog lights on for 5s |
+| 3e | `20` | 0: Rear fog lights off for 5s, 1: Rear fog lights on for 5s |
+| 40 | `00` | _Supported PIDs 41-5f bitmask_: 09 90 00 01 |
+| 45 | `20` | 0: Front wiper off for 5s, 1: Front wiper fast mode for 5s, 2: Front wiper slow mode for 5s, 3: front wiper one-shot mode |
+| 48 | `20` | 0: Rear wiper off for 5s, 1: Rear wiper on for 5s |
+| 49 | `00` | 0, 1: _TODO_ |
+| 4c | `20` | 0: Turn signals/blinkers off for 5s, 1: Right turn signal on, left off for 5s, 2: Left turn signal on, right off for 5s |
+| 60 | `00` | _Supported PIDs 61-7f bitmask_: 00 10 03 00 |
+| 69 || MISSING |
+| 77 | `20` | 0: Check oil dashboard light off for 5s, 1: Check oil dashboard light on for 5s |
+| 78 | `20` | 0, 1: _TODO_ |
+
 ## Standard service 01 PIDs (current data)
 
 This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.  The queries are sent to the address **7e0** and the replies are returned from address **7e8**.
