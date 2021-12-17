@@ -127,7 +127,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 ||
 | 5c5 | `A.7`     | IGN not fully ON? |||
 | 5c5 | `A.3`     | Handbrake / parking brake engaged as indicated on dashboard | boolean, 1 when engaged ||
-| 5c5 | `B.8-D.1` | Car odometer absolute value | 24-bit unsigned integer | km / LSB |
+| 5c5 | `B.8-D.1` | Car odometer absolute value (mileage) | 24-bit unsigned integer | km / LSB |
 | 5c5 | `E.1`     | Driver seatbelt unbuckled | boolean, 1 when unbuckled ||
 | 5c5 | `F.4-1`   | Might be oil level |||
 ||
@@ -167,26 +167,26 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 
 ## Standard service 01 PIDs (current data)
 
-This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.
+This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.  The queries are sent to the address **7e0** and the replies are returned from address **7e8**.
 
 | PID | Meaning | Unit (formula to get physical value) | Captured value |
 | --: | --- | --- | --- |
-| 00 | _Supported PIDs 01-1f bitmask_ || 98 3b 80 11 |
-| 01 | Monitor status since DTCs cleared. | bitmap | 00 64 80 00 (Diesel engine, Components test incomplete, Fuel test incomplete, EGR System test available) |
-| 04 | Calculated engine load | % (100/255 A) | 00 |
-| 05 | Engine coolant temperature | °C (A-40) | 4d |
-| 0b | Intake manifold absolute pressure | kPa (A) | 5e |
-| 0c | Engine speed | rpm (1/4(256A+B)) | 00 50 |
-| 0d | Vehicle speed | km/h (A) | 00 |
-| 0f | Intake air temperature | °C (A-40) | 51 |
-| 10 | [Mass air flow sensor (MAF)](https://en.wikipedia.org/wiki/Mass_airflow_sensor) air flow rate | grams/sec (1/100(256A+B)) | 00 00 |
-| 11 | Throttle position | % (100/255 A) | 00 |
-| 1c | OBD standards this vehicle conforms to | enum | 06 (EOBD-Europe) |
-| 20 | _Supported PIDs 21-3f bitmask_ || a0 01 80 00 |
-| 21 | Distance traveled with malfunction indicator lamp (MIL) on | km (256A+B) | 00 00 |
-| 23 | [Fuel Rail](https://en.wikipedia.org/wiki/Fuel_rail) Gauge Pressure | kPa (10(256A+B))| 00 00 |
-| 30 | Warm-ups since codes cleared | count (A) | 13 |
-| 31 | Distance traveled since codes cleared | km (256A+B) | 03 7c |
+| 00 | _Supported PIDs 01-1f bitmask_ || `98 3b 80 11` |
+| 01 | Monitor status since DTCs cleared | bitmap | `00 64 80 00` (Diesel engine, Components test incomplete, Fuel test incomplete, EGR System test available) |
+| 04 | Calculated engine load | % (100/255 A) | `00` |
+| 05 | Engine coolant temperature | °C (A-40) | `4d` |
+| 0b | Intake manifold absolute pressure | kPa (A) | `5e` |
+| 0c | Engine speed | rpm (1/4(256A+B)) | `00 50` |
+| 0d | Vehicle speed | km/h (A) | `00` |
+| 0f | Intake air temperature | °C (A-40) | `51` |
+| 10 | [Mass air flow sensor (MAF)](https://en.wikipedia.org/wiki/Mass_airflow_sensor) air flow rate | grams/sec (1/100(256A+B)) | `00 00` |
+| 11 | Throttle position | % (100/255 A) | `00` |
+| 1c | OBD standards this vehicle conforms to | enum | `06` (EOBD-Europe) |
+| 20 | _Supported PIDs 21-3f bitmask_ || `a0 01 80 00` |
+| 21 | Distance traveled with malfunction indicator lamp (MIL) on | km (256A+B) | `00 00` |
+| 23 | [Fuel Rail](https://en.wikipedia.org/wiki/Fuel_rail) Gauge Pressure | kPa (10(256A+B))| `00 00` |
+| 30 | Warm-ups since codes cleared | count (A) | `13` |
+| 31 | Distance traveled since codes cleared | km (256A+B) | `03 7c` |
 
 ## Standard service 09 PIDs (vehicle information)
 
@@ -194,21 +194,622 @@ As before this is the supported subset of the standard ECU service 09 PIDs just 
 
 | PID | Meaning | Value |
 | --: | --- | --- |
-| 00 | _Supported PIDs 01-1f bitmask_ | 54 00 00 00 |
-| 02 | [Vehicle Identification Number](https://en.wikipedia.org/wiki/Vehicle_Identification_Number) (VIN) | 01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff |
-| 04 | Calibration ID | 02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00 (23710BB31A 23701B36A) |
-| 06 | Calibration Verification Numbers (CVN) Several CVN can be output (4 bytes each) the number of CVN and CALID must match | 01 44 d8 62 a7 |
+| 00 | _Supported PIDs 01-1f bitmask_ | `54 00 00 00` |
+| 02 | [Vehicle Identification Number](https://en.wikipedia.org/wiki/Vehicle_Identification_Number) (VIN) | `01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 04 | Calibration ID | `02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00` (23710BB31A 23701B36A) |
+| 06 | Calibration Verification Numbers (CVN) Several CVN can be output (4 bytes each) the number of CVN and CALID must match | `01 44 d8 62 a7` |
 
 ## Non-standard service 22 PIDs
 
-## Missing data
+These are the manufacturer-specific service 22 PIDs that can be queried for current values from sensors, internal BCM/ECU state and/or hardcoded information.  They're read in the same way as services 01 and 09 except for the PID numbers being 16-bit.
 
-Data available on some cars but not available on Nissan Qashqai J10 or to be yet decoded:
+| PID | Meaning | Unit (format) | Captured value |
+| --: | --- | --- | --- |
+| 2000 | _Supported PIDs 2001-201f bitmask_ || `ff bf 14 59` |
+| 2001 | Battery voltage | 1/16th V / LSB | `0c 6a` |
+| 2002 | _TODO_ || `00 50` |
+| 2003 | _TODO_ || `00 00` |
+| 2004 | _TODO_ || `32 00` |
+| 2005 | _TODO_ || `04 cf` |
+| 2006 | Car odometer absolute value (mileage) | km / LSB | `01 fd ad` |
+| 2007 | (Same as 2001?) Battery voltage | 1/16th V / LSB | `0c 6a` |
+| 2008 | _TODO_ || `0c 4e` |
+| 2009 | _TODO_ || `03 b8` |
+| 200b | _TODO_ || `02 e6` |
+| 200c | _TODO_ || `01 73` |
+| 200d | _TODO_ || `00 5b` |
+| 200e | _TODO_ || `01` |
+| 200f | _TODO_ || `00` |
+| 2010 | _TODO_ || `00` |
+| 2014 | _TODO_ || `00` |
+| 2016 | _TODO_ || `00` |
+| 201a | _TODO_ || `00` |
+| 201c | _TODO_ || `00` |
+| 201d | _TODO_ || `00` |
+| 2020 | _Supported PIDs 2021-203f bitmask_ || `fd 0c 0e ff` |
+| 2021 | _TODO_ || `13 8d` |
+| 2022 | _TODO_ || `13 8d` |
+| 2023 | _TODO_ || `13 8d` |
+| 2024 | _TODO_ || `0c 80` |
+| 2025 | _TODO_ || `01` |
+| 2026 | _TODO_ || `01` |
+| 2028 | _TODO_ || `03` |
+| 202d | _TODO_ || `00` |
+| 202e | _TODO_ || `00 00` |
+| 2035 | _TODO_ || `ff` |
+| 2036 | _TODO_ || `00` |
+| 2037 | _TODO_ || `2b ed` |
+| 2039 | _TODO_ || `0f 95` |
+| 203a | _TODO_ || `01` |
+| 203b | _TODO_ || `01` |
+| 203c | _TODO_ || `00` |
+| 203d | _TODO_ || `01` |
+| 203e | _TODO_ || `01` |
+| 203f | _TODO_ || `00` |
+| 2040 | _Supported PIDs 2041-205f bitmask_ || `ff 7f ff fb` |
+| 2041 | _TODO_ || `01` |
+| 2042 | _TODO_ || `00` |
+| 2043 | _TODO_ || `01` |
+| 2044 | _TODO_ || `00 00` |
+| 2045 | _TODO_ || `03` |
+| 2046 | _TODO_ || `00` |
+| 2047 | _TODO_ || `01` |
+| 2048 | _TODO_ || `01` |
+| 204a | _TODO_ || `00` |
+| 204b | _TODO_ || `00` |
+| 204c | _TODO_ || `00` |
+| 204d | _TODO_ || `00` |
+| 204e | _TODO_ || `24` |
+| 204f | _TODO_ || `80` |
+| 2050 | _TODO_ || `00 00` |
+| 2051 | _TODO_ || `00` |
+| 2052 | _TODO_ || `00` |
+| 2053 | _TODO_ || `01` |
+| 2054 | _TODO_ || `07` |
+| 2055 | _TODO_ || `07` |
+| 2056 | _TODO_ || `00` |
+| 2057 | _TODO_ || `00 06` |
+| 2058 | _TODO_ || `00` |
+| 2059 | _TODO_ || `00` |
+| 205a | _TODO_ || `08` |
+| 205b | _TODO_ || `00` |
+| 205c | _TODO_ || `01` |
+| 205d | _TODO_ || `01` |
+| 205f | _TODO_ || `0f a0` |
+| 2060 | _Supported PIDs 2061-207f bitmask_ || `ff ee 01 ff` |
+| 2061 | _TODO_ || `32 00` |
+| 2062 | _TODO_ || `32 00` |
+| 2063 | _TODO_ || `32 00` |
+| 2064 | _TODO_ || `2b ed` |
+| 2065 | _TODO_ || `2b ed` |
+| 2066 | _TODO_ || `06 13` |
+| 2067 | _TODO_ || `0d ad` |
+| 2068 | _TODO_ || `0d ad` |
+| 2069 | _TODO_ || `00 00` |
+| 206a | _TODO_ || `00 00` |
+| 206b | _TODO_ || `00 00` |
+| 206d | _TODO_ || `01` |
+| 206e | _TODO_ || `01` |
+| 206f | _TODO_ || `f0` |
+| 2078 | _TODO_ || `00` |
+| 2079 | _TODO_ || `00` |
+| 207a | _TODO_ || `00` |
+| 207b | _TODO_ || `00` |
+| 207c | _TODO_ || `00` |
+| 207d | _TODO_ || `00` |
+| 207e | _TODO_ || `00` |
+| 207f | _TODO_ || `00` |
+| 2080 | _Supported PIDs 2081-209f bitmask_ || `ff 21 ff aa` |
+| 2081 | _TODO_ || `00` |
+| 2082 | _TODO_ || `00` |
+| 2083 | _TODO_ || `00` |
+| 2084 | _TODO_ || `01` |
+| 2085 | _TODO_ || `01` |
+| 2086 | _TODO_ || `00` |
+| 2087 | _TODO_ || `01` |
+| 2088 | _TODO_ || `01` |
+| 208b | _TODO_ || `00` |
+| 2090 | _TODO_ || `0f` |
+| 2091 | _TODO_ || `0f` |
+| 2092 | _TODO_ || `00` |
+| 2093 | _TODO_ || `02` |
+| 2094 | _TODO_ || `00` |
+| 2095 | _TODO_ || `01` |
+| 2096 | _TODO_ || `03` |
+| 2097 | _TODO_ || `02` |
+| 2098 | _TODO_ || `00 00` |
+| 2099 | _TODO_ || `eb` |
+| 209b | _TODO_ || `00` |
+| 209d | _TODO_ || `ff` |
+| 209f | _TODO_ || `00 00` |
+| 2100 | _Supported PIDs 2101-211f bitmask_ || `ff ff ff fd` |
+| 2101 | _TODO_ || `0f` |
+| 2102 | _TODO_ || `00 75 3f 01 c6 76 01 33 72 00 e2 95` |
+| 2103 | _TODO_ || `04 7d 8b a7 05 0b 43 74 02 ff bc fc 04 8a 8d 47` |
+| 2104 | _TODO_ || `00 00 00 00 00 00 00 00` |
+| 2105 | _TODO_ || `01` |
+| 2106 | _TODO_ || `01` |
+| 2107 | _TODO_ || `01 a8 a2` |
+| 2108 | _TODO_ || `00 00 00` |
+| 2109 | _TODO_ || `00 0a` |
+| 210a | _TODO_ || `37 37` |
+| 210b | _TODO_ || `00 1f` |
+| 210c | _TODO_ || `5e ce` |
+| 210d | _TODO_ || `00 f2 14 a8` |
+| 210e | _TODO_ || `01 e0 51 22` |
+| 210f | _TODO_ || `00` |
+| 2110 | _TODO_ || `01 c6 76` |
+| 2111 | _TODO_ || `01` |
+| 2112 | _TODO_ || `00` |
+| 2113 | _TODO_ || `0d 9c` |
+| 2114 | _TODO_ || `00` |
+| 2115 | _TODO_ || `00` |
+| 2116 | _TODO_ || `0a d2` |
+| 2117 | _TODO_ || `0c 26` |
+| 2118 | _TODO_ || `2c ec` |
+| 2119 | _TODO_ || `32 c8` |
+| 211a | _TODO_ || `ff ff` |
+| 211b | _TODO_ || `03 a4` |
+| 211c | _TODO_ || `03 56 c0 68` |
+| 211d | _TODO_ || `00` |
+| 211e | _TODO_ || `00` |
+| 2120 | _Supported PIDs 2121-213f bitmask_ || `ff f8 00 01` |
+| 2121 | _TODO_ || `01` |
+| 2122 | _TODO_ || `01` |
+| 2123 | _TODO_ || `01` |
+| 2124 | _TODO_ || `01` |
+| 2125 | _TODO_ || `01` |
+| 2126 | _TODO_ || `00` |
+| 2127 | _TODO_ || `01` |
+| 2128 | _TODO_ || `01` |
+| 2129 | _TODO_ || `01` |
+| 212a | _TODO_ || `00` |
+| 212b | _TODO_ || `00` |
+| 212c | _TODO_ || `2c 01 fc 3c 01 fc 42 01 fc 6f 01 fc 6f 01 fc 70 01 fc 70 01 fc 70 01 fc 70 01 fd 4f 01 fd 55 01 fd 70 01 fd 71 01 fd 71 01 fd 72 01 fd 92 01 fd 93 01 fd 94 01 fd 95 01 fd 95 01 fd 9c` |
+| 212d | _TODO_ || `00 10 9a 02 00 00 00 00 00 c0 00 78 76 74 72 70 6e 6c 6b 69 67 66 64 62 61 5f 5e 02 07 02 06 02 06 01 06 02 06 02 06 01 06 02 06 01 06 03 06` |
+| 2140 | _Supported PIDs 2141-215f bitmask_ || `00 00 00 03` |
+| 215f | _TODO_ || `00` |
+| 2160 | _Supported PIDs 2161-217f bitmask_ || `f4 00 00 01` |
+| 2161 | _TODO_ || `00` |
+| 2162 | _TODO_ || `00 98` |
+| 2163 | _TODO_ || `00 00` |
+| 2164 | _TODO_ || `00` |
+| 2166 | _TODO_ || `00` |
+| 2180 | _Supported PIDs 2181-219f bitmask_ || `96 fe f8 7e` |
+| 2181 | _TODO_ || `00 00 00 00` |
+| 2184 | _TODO_ || `ff ff` |
+| 2186 | _TODO_ || `00` |
+| 2187 | _TODO_ || `01` |
+| 2189 | _TODO_ || `00` |
+| 218a | _TODO_ || `00` |
+| 218b | _TODO_ || `00` |
+| 218c | _TODO_ || `00` |
+| 218d | _TODO_ || `00` |
+| 218e | _TODO_ || `00` |
+| 218f | _TODO_ || `00` |
+| 2191 | _TODO_ || `00 00` |
+| 2192 | _TODO_ || `00` |
+| 2193 | _TODO_ || `00` |
+| 2194 | _TODO_ || `00` |
+| 2195 | _TODO_ || `00` |
+| 219a | _TODO_ || `00 00` |
+| 219b | _TODO_ || `00 05` |
+| 219c | _TODO_ || `00` |
+| 219d | _TODO_ || `ff ff` |
+| 219e | _TODO_ || `00 00` |
+| 219f | _TODO_ || `00 00 00` |
+| 2200 | _Supported PIDs 2201-221f bitmask_ || `00 00 00 01` |
+| 2220 | _Supported PIDs 2221-223f bitmask_ || `ff de 00 01` |
+| 2221 | _TODO_ || `00` |
+| 2222 | _TODO_ || `00` |
+| 2223 | _TODO_ || `00` |
+| 2224 | _TODO_ || `00` |
+| 2225 | _TODO_ || `00` |
+| 2226 | _TODO_ || `00` |
+| 2227 | _TODO_ || `00` |
+| 2228 | _TODO_ || `00` |
+| 2229 | _TODO_ || `01` |
+| 222a | _TODO_ || `00 37` |
+| 222c | _TODO_ || `00` |
+| 222d | _TODO_ || `00` |
+| 222e | _TODO_ || `02` |
+| 222f | _TODO_ || `00` |
+| 2240 | _Supported PIDs 2241-225f bitmask_ || `00 00 00 01` |
+| 2260 | _Supported PIDs 2261-227f bitmask_ || `06 00 00 01` |
+| 2266 | _TODO_ || `00` |
+| 2267 | _TODO_ || `00` |
+| 2280 | _Supported PIDs 2281-229f bitmask_ || `60 20 00 00` |
+| 2282 | _TODO_ || `00 00` |
+| 2283 | _TODO_ || `00 00` |
+| 228b | _TODO_ || `01 54` |
+| 2400 | _Supported PIDs 2401-241f bitmask_ || `ff ab 62 05` |
+| 2401 | _TODO_ || `03 b7` |
+| 2402 | _TODO_ || `04 55` |
+| 2403 | _TODO_ || `02 0e` |
+| 2404 | _TODO_ || `06 5b` |
+| 2405 | _TODO_ || `88 00` |
+| 2406 | _TODO_ || `7c 31` |
+| 2407 | _TODO_ || `00 00` |
+| 2408 | _TODO_ || `7e 70` |
+| 2409 | _TODO_ || `83 2c` |
+| 240b | _TODO_ || `03 b7` |
+| 240d | _TODO_ || `0c 6c` |
+| 240f | _TODO_ || `01` |
+| 2410 | _TODO_ || `93 88` |
+| 2412 | _TODO_ || `00 00` |
+| 2413 | _TODO_ || `1d bc` |
+| 2417 | _TODO_ || `11 7e` |
+| 241e | _TODO_ || `09` |
+| 2420 | _Supported PIDs 2421-243f bitmask_ || `9f d5 fd f1` |
+| 2421 | _TODO_ || `0b 65` |
+| 2424 | _TODO_ || `0e a1` |
+| 2425 | _TODO_ || `07 2e` |
+| 2426 | _TODO_ || `07 25` |
+| 2427 | _TODO_ || `00 c9` |
+| 2428 | _TODO_ || `00 cb` |
+| 2429 | _TODO_ || `02 10` |
+| 242a | _TODO_ || `01 bf` |
+| 242c | _TODO_ || `06 19` |
+| 242e | _TODO_ || `04 de` |
+| 2430 | _TODO_ || `00 00` |
+| 2431 | _TODO_ || `00 00` |
+| 2432 | _TODO_ || `23 2b` |
+| 2433 | _TODO_ || `00` |
+| 2434 | _TODO_ || `00` |
+| 2435 | _TODO_ || `80 00` |
+| 2436 | _TODO_ || `80 00` |
+| 2438 | _TODO_ || `0a aa` |
+| 2439 | _TODO_ || `0e 92` |
+| 243a | _TODO_ || `54 62` |
+| 243b | _TODO_ || `09 1a` |
+| 243c | _TODO_ || `54 62` |
+| 2440 | _Supported PIDs 2441-245f bitmask_ || `c7 08 00 01` |
+| 2441 | _TODO_ || `15 5b` |
+| 2442 | _TODO_ || `0d a1` |
+| 2446 | _TODO_ || `01 e3` |
+| 2447 | _TODO_ || `00 00` |
+| 2448 | _TODO_ || `03 ac` |
+| 244d | _TODO_ || `0c bd` |
+| 2460 | _Supported PIDs 2461-247f bitmask_ || `ff fc 4b a7` |
+| 2461 | _TODO_ || `00 00 00 03 00 00 00 3c 00 00 00 03 00 00 00 7d 00 00 00 0d 00 00 01 3f 00 00 00 0e 00 00 00 f8 00 00 00 04 00 00` |
+| 2462 | _TODO_ || `00 00 00 00 00 00 00 00 00 67 00 3f 00 80 01 4c 01 06` |
+| 2463 | _TODO_ || `ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 2464 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 2465 | _TODO_ || `00 00 00 00 00 02 01 02 02 02` |
+| 2466 | _TODO_ || `00 00 00 00 00 00 00 00 01 01` |
+| 2467 | _TODO_ || `00 00 00 00 00 02 02 00 00 00` |
+| 2468 | _TODO_ || `08 17 20 07 16 19 00 0a 17 1b` |
+| 2469 | _TODO_ || `5a 4b 3d 35 2c 16 1b 24 20 1c` |
+| 246a | _TODO_ || `00 00 00 00 00 00 00 00 00 00` |
+| 246b | _TODO_ || `02 04 0a 00 02 04 08 00 02 04 08 00 02 04 08 00 02 04 0a 00` |
+| 246c | _TODO_ || `12 15 14 04 15 10 1b 17 17 01` |
+| 246d | _TODO_ || `00` |
+| 246e | _TODO_ || `a7 10` |
+| 2472 | _TODO_ || `01 fd ad` |
+| 2475 | _TODO_ || `80 00` |
+| 2477 | _TODO_ || `01` |
+| 2478 | _TODO_ || `01` |
+| 2479 | _TODO_ || `01` |
+| 247b | _TODO_ || `72` |
+| 247e | _TODO_ || `00` |
+| 247f | _TODO_ || `0b 32` |
+| 2480 | _Supported PIDs 2481-249f bitmask_ || `ff 80 0f 81` |
+| 2481 | _TODO_ || `05` |
+| 2482 | _TODO_ || `00 00` |
+| 2483 | _TODO_ || `00 04` |
+| 2484 | _TODO_ || `00 01` |
+| 2485 | _TODO_ || `01` |
+| 2486 | _TODO_ || `00` |
+| 2487 | _TODO_ || `00 00` |
+| 2488 | _TODO_ || `12 ee` |
+| 2489 | _TODO_ || `03 a4` |
+| 2495 | _TODO_ || `03 d4` |
+| 2496 | _TODO_ || `03 d4` |
+| 2497 | _TODO_ || `02 45` |
+| 2498 | _TODO_ || `00 00` |
+| 2499 | _TODO_ || `00` |
+| 24a0 | _Supported PIDs 24a1-24bf bitmask_ || `1f ff ef fd` |
+| 24a4 | _TODO_ || `00 01 01 00 01 01 01 01 00 00` |
+| 24a5 | _TODO_ || `04 de` |
+| 24a6 | _TODO_ || `02 26` |
+| 24a7 | _TODO_ || `04 4c` |
+| 24a8 | _TODO_ || `00` |
+| 24a9 | _TODO_ || `01 fc b1` |
+| 24aa | _TODO_ || `00` |
+| 24ab | _TODO_ || `00` |
+| 24ac | _TODO_ || `02 23 e2` |
+| 24ad | _TODO_ || `02 24 bb` |
+| 24ae | _TODO_ || `02 24 bb` |
+| 24af | _TODO_ || `02` |
+| 24b0 | _TODO_ || `01 fd ad` |
+| 24b1 | _TODO_ || `01 a4` |
+| 24b2 | _TODO_ || `74` |
+| 24b3 | _TODO_ || `01` |
+| 24b5 | _TODO_ || `00 0d` |
+| 24b6 | _TODO_ || `00 00` |
+| 24b7 | _TODO_ || `12 80` |
+| 24b8 | _TODO_ || `00 00` |
+| 24b9 | _TODO_ || `00` |
+| 24ba | _TODO_ || `00 00` |
+| 24bb | _TODO_ || `00 00 00` |
+| 24bc | _TODO_ || `00 00 fc` |
+| 24bd | _TODO_ || `0b 32` |
+| 24be | _TODO_ || `03 a5` |
+| 24c0 | _Supported PIDs 24c1-24df bitmask_ || `47 7f ef 31` |
+| 24c2 | _TODO_ || `7f f9` |
+| 24c6 | _TODO_ || `86 5a` |
+| 24c7 | _TODO_ || `00 cb` |
+| 24c8 | _TODO_ || `80 00` |
+| 24ca | _TODO_ || `07 26` |
+| 24cb | _TODO_ || `00` |
+| 24cc | _TODO_ || `00` |
+| 24cd | _TODO_ || `00` |
+| 24ce | _TODO_ || `80 00` |
+| 24cf | _TODO_ || `02 07` |
+| 24d0 | _TODO_ || `00` |
+| 24d1 | _TODO_ || `80 00` |
+| 24d2 | _TODO_ || `80 00` |
+| 24d3 | _TODO_ || `00 00` |
+| 24d5 | _TODO_ || `13 97` |
+| 24d6 | _TODO_ || `13 97` |
+| 24d7 | _TODO_ || `03 ba` |
+| 24d8 | _TODO_ || `00` |
+| 24db | _TODO_ || `01` |
+| 24dc | _TODO_ || `02` |
+| 24e0 | _Supported PIDs 24e1-24ff bitmask_ || `67 7b ff d1` |
+| 24e2 | _TODO_ || `00 00` |
+| 24e3 | _TODO_ || `7f f9` |
+| 24e6 | _TODO_ || `00` |
+| 24e7 | _TODO_ || `00` |
+| 24e8 | _TODO_ || `1f db` |
+| 24ea | _TODO_ || `00 00 00` |
+| 24eb | _TODO_ || `00 00` |
+| 24ec | _TODO_ || `00 15 b6 89` |
+| 24ed | _TODO_ || `03 03 03 00 05 04 03 03 0a 06` |
+| 24ef | _TODO_ || `00 ab 00 ae 00 82 00 28 00 21 00 24 00 09 00 6e 00 03 00 05` |
+| 24f0 | _TODO_ || `01 fd a9` |
+| 24f1 | _TODO_ || `01 fd ad` |
+| 24f2 | _TODO_ || `00 00` |
+| 24f3 | _TODO_ || `09 1a` |
+| 24f4 | _TODO_ || `00` |
+| 24f5 | _TODO_ || `01` |
+| 24f6 | _TODO_ || `00` |
+| 24f7 | _TODO_ || `1f db` |
+| 24f8 | _TODO_ || `1f db` |
+| 24f9 | _TODO_ || `1f db` |
+| 24fa | _TODO_ || `00 00` |
+| 24fc | _TODO_ || `80 00` |
+| 2500 | _Supported PIDs 2501-251f bitmask_ || `00 00 00 01` |
+| 2520 | _Supported PIDs 2521-253f bitmask_ || `ff f8 00 01` |
+| 2521 | _TODO_ || `80 d2` |
+| 2522 | _TODO_ || `01` |
+| 2523 | _TODO_ || `00` |
+| 2524 | _TODO_ || `00 00` |
+| 2525 | _TODO_ || `80 00` |
+| 2526 | _TODO_ || `80 00` |
+| 2527 | _TODO_ || `01 f4` |
+| 2528 | _TODO_ || `25 1c` |
+| 2529 | _TODO_ || `00 00` |
+| 252a | _TODO_ || `00 00` |
+| 252b | _TODO_ || `00 00` |
+| 252c | _TODO_ || `05 78` |
+| 252d | _TODO_ || `00` |
+| 2540 | _Supported PIDs 2541-255f bitmask_ || `ff ff e0 01` |
+| 2541 | _TODO_ || `80 00` |
+| 2542 | _TODO_ || `80 00` |
+| 2543 | _TODO_ || `01 fd ad` |
+| 2544 | _TODO_ || `00` |
+| 2545 | _TODO_ || `80 00` |
+| 2546 | _TODO_ || `00 00` |
+| 2547 | _TODO_ || `01` |
+| 2548 | _TODO_ || `01` |
+| 2549 | _TODO_ || `00` |
+| 254a | _TODO_ || `06 19` |
+| 254b | _TODO_ || `00 00` |
+| 254c | _TODO_ || `00 00` |
+| 254d | _TODO_ || `00 00` |
+| 254e | _TODO_ || `00` |
+| 254f | _TODO_ || `00` |
+| 2550 | _TODO_ || `01` |
+| 2551 | _TODO_ || `00` |
+| 2552 | _TODO_ || `00 00` |
+| 2553 | _TODO_ || `00` |
+| 2560 | _Supported PIDs 2561-257f bitmask_ || `00 00 00 11` |
+| 257c | _TODO_ || `80 00` |
+| 2580 | _Supported PIDs 2581-259f bitmask_ || `00 00 00 00` |
+| 2800 | _Supported PIDs 2801-281f bitmask_ || `c5 fd e0 21` |
+| 2801 | _TODO_ || `00 00` |
+| 2802 | _TODO_ || `01 20` |
+| 2806 | _TODO_ || `00 00` |
+| 2808 | _TODO_ || `80 00` |
+| 2809 | _TODO_ || `00 00` |
+| 280a | _TODO_ || `00 00` |
+| 280b | _TODO_ || `00 00` |
+| 280c | _TODO_ || `00 00` |
+| 280d | _TODO_ || `00 00` |
+| 280e | _TODO_ || `00 00` |
+| 2810 | _TODO_ || `80 00` |
+| 2811 | _TODO_ || `80 00` |
+| 2812 | _TODO_ || `80 00` |
+| 2813 | _TODO_ || `80 00` |
+| 281b | _TODO_ || `01` |
+| 2820 | _Supported PIDs 2821-283f bitmask_ || `34 00 00 01` |
+| 2823 | _TODO_ || `00` |
+| 2824 | _TODO_ || `00` |
+| 2826 | _TODO_ || `00 00` |
+| 2840 | _Supported PIDs 2841-285f bitmask_ || `00 00 00 01` |
+| 2860 | _Supported PIDs 2861-287f bitmask_ || `01 00 09 c1` |
+| 2868 | _TODO_ || `00 4a ff 9c` |
+| 2875 | _TODO_ || `00 00` |
+| 2878 | _TODO_ || `00` |
+| 2879 | _TODO_ || `00 00` |
+| 287a | _TODO_ || `00` |
+| 2880 | _Supported PIDs 2881-289f bitmask_ || `00 00 00 00` |
+| 2c00 | _Supported PIDs 2c01-2c1f bitmask_ || `30 00 00 01` |
+| 2c03 | _TODO_ || `01` |
+| 2c04 | _TODO_ || `01` |
+| 2c20 | _Supported PIDs 2c21-2c3f bitmask_ || `00 10 00 01` |
+| 2c2c | _TODO_ || `00` |
+| 2c40 | _Supported PIDs 2c41-2c5f bitmask_ || `00 00 00 00` |
+| 3400 | _Supported PIDs 3401-341f bitmask_ || `00 3f ff f8` |
+| 340b | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 340c | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 340d | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 340e | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 340f | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 3410 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 3411 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 3412 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 3413 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 3414 | _TODO_ || `00 00` |
+| 3415 | _TODO_ || `00 00` |
+| 3416 | _TODO_ || `00 00` |
+| 3417 | _TODO_ || `00 00` |
+| 3418 | _TODO_ || `00 00` |
+| 3419 | _TODO_ || `00 00` |
+| 341a | _TODO_ || `00 00` |
+| 341b | _TODO_ || `00 00` |
+| 341c | _TODO_ || `00 00` |
+| 341d | _TODO_ || `00 00` |
+| ef00 | _Supported PIDs ef01-ef1f bitmask_ || `58 3b 00 01` |
+| ef02 | _TODO_ || `00 00` |
+| ef04 | _TODO_ || `00` |
+| ef05 | _TODO_ || `00` |
+| ef0b | _TODO_ || `00` |
+| ef0c | _TODO_ || `00 00` |
+| ef0d | _TODO_ || `00` |
+| ef0f | _TODO_ || `00` |
+| ef10 | _TODO_ || `00 00` |
+| ef20 | _Supported PIDs ef21-ef3f bitmask_ || `20 00 80 00` |
+| ef23 | _TODO_ || `00 00` |
+| ef31 | _TODO_ || `00 00` |
+| f0e0 | _Supported PIDs f0e1-f0ff bitmask_ || `00 00 00 02` |
+| f0ff | MISSING (query returns error) |||
+| f180 | _Supported PIDs f181-f19f bitmask_ || `00 01 00 00` |
+| f190 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| f400 | _Supported PIDs f401-f41f bitmask_ || `98 3b 80 11` |
+| f401 | Monitor status since DTCs cleared || `00 64 80 00` |
+| f404 | Calculated engine load | 100/255 % / LSB | `00` |
+| f405 | Engine coolant temperature | °C (offset by 40 (decimal)) | `54` |
+| f40b | Intake manifold absolute pressure | kPa | `5e` |
+| f40c | Engine speed | 0.25 RPM / LSB | `00 50` |
+| f40d | Vehicle speed | km/h | `00` |
+| f40f | Intake air temperature | °C (offset by 40 (decimal)) | `55` |
+| f410 |  [Mass air flow sensor (MAF)](https://en.wikipedia.org/wiki/Mass_airflow_sensor) air flow rate | 0.01 grams/sec / LSB || `00 00` |
+| f411 | Throttle position | 100/255 % / LSB | `00` |
+| f41c | OBD standards this vehicle conforms to || `06` |
+| f420 | _Supported PIDs f421-f43f bitmask_ || `a0 01 80 00` |
+| f421 | Distance traveled with malfunction indicator lamp (MIL) on | km | `00 00` |
+| f423 | [Fuel Rail](https://en.wikipedia.org/wiki/Fuel_rail) Gauge Pressure | 10 kPa / LSB | `00 00` |
+| f430 | Warm-ups since codes cleared | literal | `13` |
+| f431 | Distance traveled since codes cleared | km | `03 7c` |
+| f600 | _Supported PIDs f601-f61f bitmask_ || `00 00 00 01` |
+| f620 | _Supported PIDs f621-f63f bitmask_ || `00 00 80 01` |
+| f631 | _TODO_ || `81 03 00 64 00 5a 00 c8 31 82 af 00 00 00 00 00 00` |
+| f640 | _Supported PIDs f641-f65f bitmask_ || `00 00 00 01` |
+| f660 | _Supported PIDs f661-f67f bitmask_ || `00 00 00 01` |
+| f680 | _Supported PIDs f681-f69f bitmask_ || `00 00 00 01` |
+| f6a0 | _Supported PIDs f6a1-f6bf bitmask_ || `00 00 40 01` |
+| f6b2 | _TODO_ || `86 01 00 3d 00 00 00 18 b2 87 01 00 01 00 00 00 ff` |
+| f6c0 | _Supported PIDs f6c1-f6df bitmask_ || `00 00 00 00` |
+| f6e0 | _Supported PIDs f6e1-f6ff bitmask_ || `00 00 00 00` |
+| f800 | _Supported PIDs f801-f81f bitmask_ || `55 00 00 00` |
+| f802 | [Vehicle Identification Number](https://en.wikipedia.org/wiki/Vehicle_Identification_Number) (VIN) || `01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| f804 | Calibration ID || `02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00` |
+| f806 | Calibration Verification Numbers (CVN) Several CVN can be output (4 bytes each) the number of CVN and CALID must match || `01 44 d8 62 a7` |
+| f808 | _TODO_ || `0a e8 53 d2` |
+| fd00 | _Supported PIDs fd01-fd1f bitmask_ || `03 cf 1f ff` |
+| fd07 | _TODO_ || `9f de` |
+| fd08 | _TODO_ || `71 de` |
+| fd09 | _TODO_ || `79 46` |
+| fd0a | _TODO_ || `74 fe` |
+| fd0d | _TODO_ || `45 48 48 48` |
+| fd0e | _TODO_ || `46 47 48 48` |
+| fd0f | _TODO_ || `46 4c 4c 4b` |
+| fd10 | _TODO_ || `48 47 47 47` |
+| fd14 | _TODO_ || `3f f5 3f f5 3f f5 3f f5 3f f5 3f f5 40 17 40 0e 3f df 3f df 3f f8 40 20 3f f2 3f f2 40 04 40 0e` |
+| fd15 | _TODO_ || `01` |
+| fd16 | _TODO_ || `01` |
+| fd17 | _TODO_ || `01` |
+| fd18 | _TODO_ || `01` |
+| fd19 | _TODO_ || `8e e7` |
+| fd1a | _TODO_ || `8f 08` |
+| fd1b | _TODO_ || `8c af` |
+| fd1c | _TODO_ || `8c a7` |
+| fd1d | _TODO_ || `41 37` |
+| fd1e | _TODO_ || `3f f2 3f f2 3f f2 3f f2 3f f2 3f f2 40 1a 40 12 40 12 40 12 40 24 40 2d 3f fb 3f fb 40 02 40 0a` |
+| fd1f | _TODO_ || `3f f1 3f f1 3f f1 3f f1 3f f1 3f f1 40 1d 40 15 3f fa 3f fa 40 31 40 2c 3f fa 3f fa 40 12 40 10` |
+| fd20 | _Supported PIDs fd21-fd3f bitmask_ || `00 00 00 1f` |
+| fd3c | _TODO_ || `41 36` |
+| fd3d | _TODO_ || `42 46` |
+| fd3e | _TODO_ || `41 31` |
+| fd3f | _TODO_ || `3f f5 3f f5 3f f5 3f f5 3f f5 3f f5 40 0e 40 05 3f f5 3f f5 40 15 40 18 40 07 40 07 40 04 40 03` |
+| fd40 | _Supported PIDs fd41-fd5f bitmask_ || `60 0d fe 01` |
+| fd42 | _TODO_ || `00` |
+| fd43 | _TODO_ || `00` |
+| fd4d | _TODO_ || `00 00` |
+| fd4e | _TODO_ || `00` |
+| fd50 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 05 00 04 00 00 00 00 00 05 00 1d 00 0b 00 00 00 08 00 ca 00 4f 00 01 00 03 00 bd 00 bc 00 08 00 00 00 15 00 1e 00 18 00 00 00 03 00 07 00 00` |
+| fd51 | _TODO_ || `00 00 00 00 00 00 00 00 00 cc c8 64 00 cc c3 73 00 cc e5 78 00 cc eb db 00 cc ef 6d 00 cc e6 aa` |
+| fd52 | _TODO_ || `82 d8 83 22 83 17 81 40 82 d8 83 22 83 17 81 40 82 d8 83 22 83 17 81 40 81 05 82 ca 83 17 81 40 81 9c 83 31 82 29 81 40 81 14 82 29 82 f1 81 24 7f 1d 81 62 81 c2 81 bf 7f 1d 81 61 82 4e 7f 1d` |
+| fd53 | _TODO_ || `00` |
+| fd54 | _TODO_ || `00 00 00 00 00 02 00 03 00 04 00 05 00 05 00 06` |
+| fd55 | _TODO_ || `00 00 00 00 00 00 00 00 00 cc c8 58 00 cc c8 3a 00 cc b8 ff 00 cc e3 13 00 cc d7 41 00 cc e5 c0` |
+| fd56 | _TODO_ || `7b 2f 7b 2f 7b 2f 7b 84 7e 56 7c ba 7d cf 80 3f` |
+| fd57 | _TODO_ || `00` |
+| fd60 | _Supported PIDs fd61-fd7f bitmask_ || `00 81 0f 81` |
+| fd69 | _TODO_ || `00 57` |
+| fd70 | _TODO_ || `00` |
+| fd75 | _TODO_ || `00 00` |
+| fd76 | _TODO_ || `00 00` |
+| fd77 | _TODO_ || `80 00` |
+| fd78 | _TODO_ || `2c f5` |
+| fd79 | _TODO_ || `00` |
+| fd80 | _Supported PIDs fd81-fd9f bitmask_ || `57 f8 0f f9` |
+| fd82 | _TODO_ || `26 e0` |
+| fd84 | _TODO_ || `14 c9` |
+| fd86 | _TODO_ || `14 e0` |
+| fd87 | _TODO_ || `00 00` |
+| fd88 | _TODO_ || `52 e1` |
+| fd89 | _TODO_ || `23 78` |
+| fd8a | _TODO_ || `19 80` |
+| fd8b | _TODO_ || `22 75` |
+| fd8c | _TODO_ || `00 00` |
+| fd8d | _TODO_ || `54 62` |
+| fd95 | _TODO_ || `00 00` |
+| fd96 | _TODO_ || `00 00` |
+| fd97 | _TODO_ || `00 00` |
+| fd98 | _TODO_ || `00 00` |
+| fd99 | _TODO_ || `00 00` |
+| fd9a | _TODO_ || `00 00` |
+| fd9b | _TODO_ || `80 00` |
+| fd9c | _TODO_ || `80 00` |
+| fd9d | _TODO_ || `80 00` |
+| fda0 | _Supported PIDs fda1-fdbf bitmask_ || `30 00 07 f0` |
+| fda3 | _TODO_ || `00` |
+| fda4 | _TODO_ || `00` |
+| fdb6 | _TODO_ || `00 00` |
+| fdb7 | _TODO_ || `00 00` |
+| fdb8 | _TODO_ || `00 19` |
+| fdb9 | _TODO_ || `00 00` |
+| fdba | _TODO_ || `00 19` |
+| fdbb | _TODO_ || `00` |
+| fdbc | _TODO_ || `00 20 00 20 00 20 00 20` |
+| fee0 | _Supported PIDs fee1-feff bitmask_ || `00 00 00 02` |
+| feff | MISSING (query returns error) |||
+
+## TO DO
+
+Write the [DBC file](https://www.csselectronics.com/pages/can-dbc-file-database-intro) for the periodic messages and the information PID queries perhaps using the free online editor.
+
+Find out a message combination to stop the engine, perhaps by imitating the periodic messages.
+
+Data available on some cars but not available on Nissan Qashqai J10 or yet to be decoded:
 * Fuel level
 * Outside temperature
 * Outside brightness level (bright/dark, from the Light & Rain sensor)
 * ASCD clutch switch
-* Seatbelt status and occupancy sensor status
+* Seatbelt status and occupancy sensor status other than driver
 * Car VIN
-* Current time and/or data
+* Current time and/or date
 * Current GPS lat/lon/number of satellites
