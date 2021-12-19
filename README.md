@@ -870,7 +870,42 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | fee0 | _Supported PIDs fee1-feff bitmask_ || `00 00 00 02` |
 | feff | MISSING (query returns error) |||
 
-## Non-standard service 21 PIDs
+## BCM non-standard service 21 PIDs
+
+These are some manufacturer-specific service 21 PID/CIDs that can be queried for BCM information.  They're read in the same way as services 01 and 09 but only within a diagnostic session (command `10 c0`).  In a normal session the reads will return error 0x80.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
+
+| PID | Meaning | Captured value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | `c0 00 00 01` |
+| 01 | _TODO_ | `d7 0a fc 95 28 04 20 d5 11 34 21 14 1e 98 14 cd 06 02 00 89 b8 02 0f bc 02 80 98 a0 00 00 40 88 88 00` |
+| 02 | _TODO_ | `42 52 30 33 30` (ascii BR030) |
+| 20 || _Supported PIDs 21-3f bitmask_: `80 00 00 01` |
+| 21 | _TODO_ | `90 8c df` |
+| 40 || _Supported PIDs 41-5f bitmask_: `df fd 90 00` |
+| 41 | `A.8`: IGN in ON, `A.7`: emergency lights switch, `A.6`: right turn switch, `A.5`: left turn switch, `A.4`: brake pedal (brake light switch) | `80 00 00 00 00` |
+| 42 | `A.8`: IGN in ON, `A.7`: key inserted, `A.6`: driver door open, `A.5`: passenger door open, `A.4`: rear right door open, `A.3`: rear left door open`, `C.4`: IGN in ACC or ON, others _TODO_ | `c0 00 08 00 00 00 00 00` |
+| 44 | `A.8`: IGN in ON, `A.7`: key inserted, `A.6`: driver door open, `A.4`: lights selector in the 3rd or 4th position, i.e. low-beam lights and/or position lights are on -- but 0 when the same lights are on in AUTO or triggered by the fog lights switch -- this bit strictly depends on the selector position, `A.1`: passenger door open, `B.8`: rear right door open, `B.7`: rear left door open`, `B.6`: trunk door open, others _TODO_ | `c0 00 00 00 00` |
+| 45 | `A.8` and `A.7`: IGN in ON or START, `A.6-4`: 0b000: front wipers selector in OFF (2nd position), 0b001: front wipers selector in AUTO (3rd position), 0b010: front wipers selector in SLOW or one-shot (4th or 1st position), 0b100: front wipers selector in FAST (5th position), `B.5`: front wipers NOT moving right now, `E.8-7`: 0b00: rear wiper selector in OFF, 0b01: rear wiper selector in INTERMITTENT, 0b10: rear wiper selector in FAST, `E.5`: rear wiper moving right now, `E.4`: reverse gear, other bits _TODO_ | `c0 f0 00 00 00 00 00 00 00` |
+| 46 | `A.8`: IGN in ACC or ON, `A.7`: IGN in ACC, other bits _TODO_ | `c0 00 00 00 00` |
+| 47 | `A.8`: IGN in ON or START, `A.7`: key inserted, `A.4`: driver door open, `A.3`: passenger door open, `A.2`: rear right door open, `A.1`: rear left door open, `B.8`: trunk door open, `B.6`: IGN in ACC or ON, other bits _TODO_ | `c0 20 00 00 00 00 00 00 00 00` |
+| 48 | `A.8`: IGN in ON or START, `A.7`: key inserted, `A.2`: IGN in ON or ACC, `B.7`: driver door open, `B.6`: passenger door open, `B.5`: rear right door open, `B.4`: rear left door open, `B.3`: trunk door open, other bits _TODO_ | `e0 00 00 00 c0 00 00 00 00` |
+| 49 | `A.8`: IGN in ON or START, `A.7`: IGN in ON or ACC, `A.6`: high-beam switch (stick forward) on, `A.5-2`: 0b0000: light selector in OFF, 0b0001: light selector in AUTO, 0b0010: light selector in position/parking/side position, 0b1110: light selector in low-beam position, `A.1`: high-beam temporary switch (stick towards driver) on, `B.8-7`: 0b00: fog lights selector in 1st position (OFF), 0b10: fog lights selector in 2nd position (front fog lights), 0b11: fog lights selector in 3rd position (toggle rear fog lights+front on) `B.6`: driver door open, `B.5`: passenger door open, `B.4`: rear right door open, `B.3`: rear left door open, `B.2`: trunk door open, `B.1`: right turn switch on, `C.8`: left turn switch on, `C.3`: engine running, `G.8-7`: dashboard lights? other bits _TODO_ | `c0 00 00 00 00 00 40 1e 00 00` |
+| 4a | `A.8`: right turn switch on, `A.7`: left turn switch on, `A.6`: high-beam switch (stick forward) on, `A.5-3,1`: 0b000x0: light selector in OFF, 0b000x1: light selector in AUTO, 0b001x0: light selector in position/parking/side position, 0b111x0: light selector in low-beam position, `A.2`: high-beam temporary switch (stick towards driver) on, `B.8-7`: 0b00: fog lights selector in 1st position (OFF), 0b10: fog lights selector in 2nd position (front fog lights), 0b11: fog lights selector in 3rd position (toggle rear fog lights+front on), `B.6-4`: 0b000: front wipers selector in OFF (2nd position), 0b001: front wipers selector in AUTO (3rd position), 0b010: front wipers selector in SLOW or one-shot (4th or 1st position), 0b100: front wipers selector in FAST (5th position), `B.3`: front wiper sprinkler switch on, `C.5-4`: 0b00: rear wiper selector in OFF, 0b01: rear wiper selector in INTERMITTENT, 0b10: rear wiper selector in FAST, `C.3`: rear wiper sprinkle switch on, other bits _TODO_ | `00 00 e0 00 00 00 00` |
+| 4b | `B.4`: IGN in ON or START, `B.3`: IGN in ON or ACC, `B.2`: key inserted, other bits _TODO_ | `00 0e 80 00 00` |
+| 4c | `A.8`: IGN in ON or START, `A.7`: blower fan on, `A.6`: A/C on, other bits _TODO_ | `80 00 00 00 00` |
+| 4d | `A.8`: key inserted, `A.1`: IGN in ON or START, other bits _TODO_ | `81 00 00 00 00 00 00 00` |
+| 4e | `A.8`: IGN in ON or START, `A.7`: IGN in ON or ACC, `A.6`: key inserted, other bits _TODO_ | `e0 00 00 00 00 00 00 00 00` |
+| 50 | `A.8`: IGN in ON or START, `A.6`: key inserted, other bits _TODO_ | `d0 40 c0 00 00` |
+| 51 | `A.8`: IGN in ON or START, `A.7`: brake pedal depressed (braking light on), other bits _TODO_ | `80 00 00 00 00` |
+| 54 | `A.6`: blower fan on, `A.5`: TODO, `A.2,1`: TODO (1 after engine stopped, 2 when running?), `B.8-1`: might be coolant temperature, `C.8-1` might be battery voltage, `E.8-1`: engine revolutions / RPMs, `F.8-1` might be intake temperature, other bits _TODO_ | `81 53 9f 00 00 3a 00 00 00 00 00` |
+| 82 || `32 4c 01 01 01 ff 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 01 ff ff ff ff ff ff ff ff ff ff ff 00` |
+| 83 || `42 52 30 32 41 45 44 03 17 00 05 03 68 01 11 00 00 00 00 00 00 00 00 80` (ascii BR02AED) |
+| 90 || `0b b8` |
+| 91 || `03 e8` |
+| 92 || `05` |
+| 94 || `00` |
+
+## Engine non-standard service 21 PIDs
 
 These are some manufacturer-specific service 21 PID/CIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
 
