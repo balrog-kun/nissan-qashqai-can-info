@@ -669,7 +669,7 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 2540 | _Supported PIDs 2541-255f bitmask_ || `ff ff e0 01` |
 | 2541 | _TODO_ || `80 00` |
 | 2542 | _TODO_ || `80 00` |
-| 2543 | Car odometer absolute value (mileage) | km / LSB || `01 fd ad` |
+| 2543 | Car odometer absolute value (mileage) | km / LSB | `01 fd ad` |
 | 2544 | _TODO_ || `00` |
 | 2545 | _TODO_ || `80 00` |
 | 2546 | _TODO_ || `00 00` |
@@ -869,6 +869,23 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | fdbc | _TODO_ || `00 20 00 20 00 20 00 20` |
 | fee0 | _Supported PIDs fee1-feff bitmask_ || `00 00 00 02` |
 | feff | MISSING (query returns error) |||
+
+## Non-standard service 21 PIDs
+
+These are some manufacturer-specific service 21 PIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks.  I currently have no information on what any of those values actually mean.
+
+| PID | Captured value |
+| --: | --- |
+| 80 | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 01 01 01 88` (ascii BB36AF4BE0669R) |
+| 81 | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 82 | `95 03 00 00 00 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 84 | `34 42 45 46 31 33 30 32 31 33 35 31 33 30 35 32 31 20 20 20` (ascii 4BEF1302135130521) |
+| f0 | `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R)
+| f1 | `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
+| fc | `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R) |
+| fd | `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
+| fe | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 02 01 00 88` (ascii BB36AF4BE0669R) |
+| ff | `42 42 33 31 41 4e 4d 55 4b 00 45 4f 4c 50 47 01 13 02 26 13 22 5c b8 12` (ascii BB31ANMUK EOLPG) |
 
 ## TO DO
 
