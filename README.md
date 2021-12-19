@@ -184,7 +184,7 @@ Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the
 
 | PID | Function (`0x00`/`0x20`) | Values |
 | --: | :-: | --- |
-| 00 || _Supported PIDs 01-1f bitmask_: 32 20 c6 81 |
+| 00 || _Supported PIDs 01-1f bitmask_: `32 20 c6 81` |
 | 03 | `00` | 0: nothing, 1 & 2: _TODO_ -- beeps like the lock/unlock switch and a relay action can be heard from the BCM |
 | 04 | `20` | 0, 1, 2: _TODO_ |
 | 07 | `00` | 0: nothing, 1: Lock doors, 2: Unlock all doors, 3: Unlock driver door, 4: Unlock passenger doors |
@@ -194,22 +194,48 @@ Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the
 | 16 | `20` | 0: key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
 | 17 | `20` | 0: Roof light on for 5s, 1: Roof light on for 5s (same?) |
 | 19 | `20` | 0: Roof light off, 1: Roof light on for 5s, 2: Roof light auto mode? in ACC on for 5s, in ON fade out and off for 5s |
-| 20 || _Supported PIDs 21-3f bitmask_: 84 00 00 6d |
+| 20 || _Supported PIDs 21-3f bitmask_: `84 00 00 6d` |
 | 21 | `20` | 0: No-key dashboard light off for 5s, 1: No-key dashboard light on for 5s |
 | 26 | `00` | 0: nothing, 1: Trunk door open |
 | 3a | `20` | 0: Position/parking/side lights off for 5s, 1: Position/parking/side lights on for 5s |
 | 3b | `20` | 0: Low-/high-beam off for 5s, 1: Low-beam lights on for 5s, 2: High-beam lights on for 5s |
 | 3d | `20` | 0: Front fog lights off for 5s, 1: Front fog lights on for 5s |
 | 3e | `20` | 0: Rear fog lights off for 5s, 1: Rear fog lights on for 5s |
-| 40 || _Supported PIDs 41-5f bitmask_: 09 90 00 01 |
+| 40 || _Supported PIDs 41-5f bitmask_: `09 90 00 01` |
 | 45 | `20` | 0: Front wiper off for 5s, 1: Front wiper fast mode for 5s, 2: Front wiper slow mode for 5s, 3: front wiper one-shot mode |
 | 48 | `20` | 0: Rear wiper off for 5s, 1: Rear wiper on for 5s |
 | 49 | `00` | 0, 1: _TODO_ |
 | 4c | `20` | 0: Turn signals/blinkers off for 5s, 1: Right turn signal on, left off for 5s, 2: Left turn signal on, right off for 5s |
-| 60 || _Supported PIDs 61-7f bitmask_: 00 10 03 00 |
+| 60 || _Supported PIDs 61-7f bitmask_: `00 10 03 00` |
 | 69 || MISSING |
 | 77 | `20` | 0: Check oil dashboard light off for 5s, 1: Check oil dashboard light on for 5s |
 | 78 | `20` | 0, 1: _TODO_ |
+
+## ECU diagnostic action PIDs (commands)
+
+The engine computer seems to have its own service 0x30 to trigger diagnostic actions, with a similar syntax to the BCM's service 0x30.  The service 0x30 commands as well as the diagnostic session request (`02 10 c0`) now need to be sent to address **7e0** instead of **745**.  The function byte is always `00` and the value byte is apparently ignored, so the functions and values are not listed below.
+
+These commands can't be used when the engine is running, error `22` (conditionsNotCorrect) is returned if they're attempted with the engine running.  Similarly some of the commands return error `22` if a previous related command is still in effect.  The PIDs may be specific to the K9K engine or a subset of engines.
+
+| PID | Action |
+| --: | --- |
+| 03 | Runs the radiator for 2-3 secs |
+| 04 | Runs the radiator for 2-3 secs |
+| 11 | _TODO_ |
+| 12 | _TODO_ (2 or 3 quiet tick sounds in 2 sec intervals)
+| 13 | _TODO_ |
+| 14 | _TODO_ |
+| 17 | _TODO_ |
+| 18 | _TODO_ (makes a quiet ~5 Hz ticking noise from engine room for ~5 secs) |
+| 22 | _TODO_ |
+| 26 | _TODO_ |
+| 35 | _TODO_ |
+| 36 | _TODO_ |
+| 37 | _TODO_ |
+| 38 | _TODO_ |
+| 41 | _TODO_ |
+| 42 | _TODO_ |
+| 43 | _TODO_ |
 
 ## Standard service 01 PIDs (current data)
 
@@ -242,7 +268,7 @@ As before this is the supported subset of the standard ECU service 09 PIDs just 
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `54 00 00 00` |
 | 02 | [Vehicle Identification Number](https://en.wikipedia.org/wiki/Vehicle_Identification_Number) (VIN) | `01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
-| 04 | Calibration ID | `02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00` (23710BB31A 23701B36A) |
+| 04 | Calibration ID | `02 32 33 37 31 30 42 42 33 31 41 00 00 00 00 00 00 32 33 37 30 31 42 42 33 36 41 00 00 00 00 00 00` (ascii 23710BB31A 23701B36A) |
 | 06 | Calibration Verification Numbers (CVN) Several CVN can be output (4 bytes each) the number of CVN and CALID must match | `01 44 d8 62 a7` |
 
 ## Non-standard service 22 PIDs
