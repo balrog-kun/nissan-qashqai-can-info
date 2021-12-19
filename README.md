@@ -363,7 +363,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 206d | _TODO_ || `01` |
 | 206e | _TODO_ || `01` |
 | 206f | _TODO_ || `f0` |
-| 2078 | _TODO_ || `00` |
+| 2078 | Occasionally 2, _TODO_ || `00` |
 | 2079 | _TODO_ || `00` |
 | 207a | _TODO_ || `00` |
 | 207b | _TODO_ || `00` |
@@ -383,14 +383,14 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 208b | _TODO_ || `00` |
 | 2090 | _TODO_ || `0f` |
 | 2091 | _TODO_ || `0f` |
-| 2092 | _TODO_ || `00` |
+| 2092 | 1 when AC on || `00` |
 | 2093 | _TODO_ || `02` |
 | 2094 | _TODO_ || `00` |
-| 2095 | _TODO_ || `01` |
+| 2095 | 1 when engine stopped, 0 when running || `01` |
 | 2096 | _TODO_ || `03` |
 | 2097 | _TODO_ || `02` |
 | 2098 | _TODO_ || `00 00` |
-| 2099 | _TODO_ || `eb` |
+| 2099 | Goes up with electric current demand, goes down with engine RPMs || `eb` |
 | 209b | _TODO_ || `00` |
 | 209d | _TODO_ || `ff` |
 | 209f | _TODO_ || `00 00` |
@@ -408,7 +408,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 210b | _TODO_ || `00 1f` |
 | 210c | _TODO_ || `5e ce` |
 | 210d | _TODO_ || `00 f2 14 a8` |
-| 210e | _TODO_ || `01 e0 51 22` |
+| 210e | Absolute engine revolution conuter? Updates when stopping engine || `01 e0 51 22` |
 | 210f | _TODO_ || `00` |
 | 2110 | _TODO_ || `01 c6 76` |
 | 2111 | _TODO_ || `01` |
@@ -434,17 +434,17 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2126 | _TODO_ || `00` |
 | 2127 | _TODO_ || `01` |
 | 2128 | _TODO_ || `01` |
-| 2129 | _TODO_ || `01` |
+| 2129 | 1 when engine stopped, 0 when running || `01` |
 | 212a | _TODO_ || `00` |
 | 212b | _TODO_ || `00` |
 | 212c | _TODO_ || `2c 01 fc 3c 01 fc 42 01 fc 6f 01 fc 6f 01 fc 70 01 fc 70 01 fc 70 01 fc 70 01 fd 4f 01 fd 55 01 fd 70 01 fd 71 01 fd 71 01 fd 72 01 fd 92 01 fd 93 01 fd 94 01 fd 95 01 fd 95 01 fd 9c` |
 | 212d | _TODO_ || `00 10 9a 02 00 00 00 00 00 c0 00 78 76 74 72 70 6e 6c 6b 69 67 66 64 62 61 5f 5e 02 07 02 06 02 06 01 06 02 06 02 06 01 06 02 06 01 06 03 06` |
 | 2140 | _Supported PIDs 2141-215f bitmask_ || `00 00 00 03` |
-| 215f | _TODO_ || `00` |
+| 215f | 1 if engine has been started since ECU boot? || `00` |
 | 2160 | _Supported PIDs 2161-217f bitmask_ || `f4 00 00 01` |
-| 2161 | _TODO_ || `00` |
+| 2161 | 1 when engine running || `00` |
 | 2162 | _TODO_ || `00 98` |
-| 2163 | _TODO_ || `00 00` |
+| 2163 | Changes rapidly whlie engine running (values from a subset) || `00 00` |
 | 2164 | _TODO_ || `00` |
 | 2166 | _TODO_ || `00` |
 | 2180 | _Supported PIDs 2181-219f bitmask_ || `96 fe f8 7e` |
@@ -463,7 +463,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2192 | _TODO_ || `00` |
 | 2193 | _TODO_ || `00` |
 | 2194 | _TODO_ || `00` |
-| 2195 | _TODO_ || `00` |
+| 2195 | Occasionally 1 when blower is on but not reliably || `00` |
 | 219a | _TODO_ || `00 00` |
 | 219b | _TODO_ || `00 05` |
 | 219c | _TODO_ || `00` |
@@ -481,9 +481,9 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2227 | _TODO_ || `00` |
 | 2228 | _TODO_ || `00` |
 | 2229 | _TODO_ || `01` |
-| 222a | _TODO_ || `00 37` |
-| 222c | _TODO_ || `00` |
-| 222d | _TODO_ || `00` |
+| 222a | Climate control power usage? doesn't seem to react to other electrical loads || `00 37` |
+| 222c | ASCD Clutch switch, 1 when depressed || `00` |
+| 222d | ASCD Clutch switch, 1 when depressed || `00` |
 | 222e | _TODO_ || `02` |
 | 222f | _TODO_ || `00` |
 | 2240 | _Supported PIDs 2241-225f bitmask_ || `00 00 00 01` |
@@ -889,7 +889,7 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 
 ## Non-standard service 0x23 (ROM dump)
 
-Apparently the Engine ECU (address **7e0**) and the BCM (address **745**) implement service 0x23 but I've been unable to get any data out of them so far.  SID 0x23 is known as "Read Memory by Address" in some procotols.  The message syntax is [as described in this blog post](https://leftoverpi.com/2020/01/23/reading-a-370z-ecu-rom/), i.e. the command consists of the length byte (`07`), the Service ID (`23`), the 32-bit big-endian read start address and the 16-bit big-endian number of bytes to read, e.g. `07 23 00 00 12 34 00 3f` to request 63 bytes starting at memory address 0x1234.  The command returns error `0x7f` if attempted in the normal session mode.  In that (370Z-specific) blog post those commands are executed in the `0xfb` session (`elevatedDiagSession`) but that mode is not supported on the J10 Qashqai.  However, executing the command in session `0xc0` mode (`startDiagSession`) resolves the `0x7f` error.  Instead error `0x12` (`subFunctionNotSupported-invalidFormat`) is then returned as if the start address was incorrect.  More research needed.
+Apparently the Engine ECU (address **7e0**) and the BCM (address **745**) implement service 0x23 but I've been unable to get any data out of them so far.  SID 0x23 is known as "Read Memory by Address" in some procotols.  The message syntax is [as described in this blog post](https://leftoverpi.com/2020/01/23/reading-a-370z-ecu-rom/), i.e. the command consists of the length byte (`07`), the Service ID (`23`), the 32-bit big-endian read start address and the 16-bit big-endian number of bytes to read, e.g. `07 23 00 00 12 34 00 3f` to request 63 bytes starting at memory address 0x1234.  The command returns error `0x7f` if attempted in the normal session mode.  In that (370Z-specific) blog post those commands are executed in the `0xfb` session (`elevatedDiagSession`) but that mode is not supported on the J10 Qashqai.  However, executing the command in session `0xc0` mode (`startDiagSession`) resolves the `0x7f` error and instead error `0x12` (`subFunctionNotSupported-invalidFormat`) is then returned.  In session `0x85` error `0x11` is returned.  More research needed.
 
 ## TO DO
 
