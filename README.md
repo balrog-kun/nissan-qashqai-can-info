@@ -42,7 +42,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 002 | `C.8-1`   | Steering wheel rate (TODO) |||
 | 002 | `E.8-1`   | Message serial/timestamp | unsigned integer ||
 ||
-| 160 | `A.8-B.5` | RPM rate of change or pressure somewhere in the engine > when revving up, < when revving down | 12-bit unsigned integer ||
+| 160 | `A.8-B.5` | Varies with engine load, could be pressure value, > when revving up, < when revving down, usually follows `180: C.8-D5` and `180: D.4-E.1` | 12-bit unsigned integer ||
 | 160 | `D.8-E.7` | Accelerator/throttle pedal position (soft zone, value remains at maximum when above 75% stroke, i.e. all stiff zone) | integer between 0 (released) and 792 (at or behind the stiff-zone threshold) ||
 | 160 | `E.6`     | WOT -- Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if at or behind threshold ||
 | 160 | `G.8-H.7` | Same as `D.8-E.7` -- according to brad370 these two values are compared for error detection |||
@@ -53,7 +53,9 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 161 | `D.1`     | WOT -- Accelerator/throttle pedal in stiff zone, i.e. > 75% stroke | boolean, 1 if behind threshold ||
 | 161 | `E.8-1`   | Accelerator/throttle pedal position (soft zone, value remains at maximum when above 75% stroke, i.e. all stiff zone) | integer between 0 (released) and 0xfc (at or behind the stiff-zone threshold) ||
 ||
-| 180 | `A.8-B.2` | Engine revolutions | 15-bit unsigned integer | 0.25 RPM / LSB (service manual page MWI-27 says 8191.875 is displayed in case of malfunction, implying that the whole 16-bit value of `A.8-B.1` -- hypothetically `0xffff` in that case -- is simply divided by 8 to get the RPMs) |
+| 180 | `A.8-B.2` | Engine speed / revolutions | 15-bit unsigned integer | 0.25 RPM / LSB (service manual page MWI-27 says 8191.875 is displayed in case of malfunction, implying that the whole 16-bit value of `A.8-B.1` -- hypothetically `0xffff` in that case -- is simply divided by 8 to get the RPMs) |
+| 180 | `C.8-D.5` | Varies with engine load, could be pressure value, usually follows `D.4-E.1` and `160: A.8-B.5` | 12-bit unsigned integer ||
+| 180 | `D.4-E.1` | Varies with engine load, could be pressure value, usually follows `C.8-D.5` and `160: A.8-B.5` | 12-bit unsigned integer ||
 ||
 | 19b | `A.8-5`   | Engine running status? |||
 | 19b | `C.8-D.1` | Related to fuel consumption, up when revving up, low at constant revs, 0 when revving down (doesn't match fuel consumption calculated from the l/100km efficiency indication on dashboard multiplied by current velocity though) | 16-bit unsigned integer ||
@@ -80,8 +82,8 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 285 | `E.8-1`   | Vehicle absolute speed | 8-bit unsigned integer | km/h |
 | 285 | `G.8-H.1` | Message serial/timestamp | unsigned integer ||
 ||
-| 2a0 | `B.8-C.1` | Lateral axis acceleration force | 16-bit unsigned integer, 0x8000 in equilibrium, higher values when force towards right, i.e. when parked with right wheels lower or turning left (in forward or in reverse), < 0x8000 when parked with right wheels higher or turning right (in forward or in reverse) ||
-| 2a0 | `D.8-E.1` | Turn rate about vertical axis | 16-bit unsigned integer, 0x8000 no turn, higher values in left turn (right in reverse), < 0x8000 in right turn (left in reverse) ||
+| 2a0 | `B.8-C.1` | Lateral axis acceleration force | 16-bit unsigned integer, 0x8000 in equilibrium, higher values when force towards right, i.e. when parked with right wheels lower or turning left (in forward or in reverse), < 0x8000 when parked with right wheels higher or turning right (in forward or in reverse) | 0.0001274 g / LSB according to some specs |
+| 2a0 | `D.8-E.1` | Turn rate about vertical axis | 16-bit unsigned integer, 0x8000 no turn, higher values in left turn (right in reverse), < 0x8000 in right turn (left in reverse) | 0.005 °/s / LSB according to some specs|
 ||
 | 2de | `E.2`     | Efficiency unit is l/100km, as opposed to MPG or km/l | boolean, 1 when l/100km ||
 | 2de | `G.8-H.1` | Distance-to-empty -- range at current fuel economy and fuel left (minus reserve, i.e. 0 km when fuel gauge in red zone), as shown on one of the dashboard panels | 16-bit unsigned integer | 0.1 km / LSB rounded to 1 km (10 LSBs) -- when efficiency unit set to l/100km |
@@ -182,29 +184,29 @@ Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the
 
 | PID | Function (`0x00`/`0x20`) | Values |
 | --: | :-: | --- |
-| 00 | `00` | _Supported PIDs 01-1f bitmask_: 32 20 c6 81 |
-| 03 | `00` | 0: nothing, 1 & 2: _TODO_ -- beeps like the lock/unlock switch and a relay switch can be heard from the BCM |
+| 00 || _Supported PIDs 01-1f bitmask_: 32 20 c6 81 |
+| 03 | `00` | 0: nothing, 1 & 2: _TODO_ -- beeps like the lock/unlock switch and a relay action can be heard from the BCM |
 | 04 | `20` | 0, 1, 2: _TODO_ |
-| 07 | `00` | 0: nothing, 1: Lock car, 2: Unlock all door, 3: Unlock driver, 4: Unlock passenger |
+| 07 | `00` | 0: nothing, 1: Lock doors, 2: Unlock all doors, 3: Unlock driver door, 4: Unlock passenger doors |
 | 0b | `20` | 0: Rear window defogging (defrost) off for 5s, 1: Rear window defogging (defrost) on for 5s |
 | 11 | `20` | 0: Key beep off, 1: Key beep continuous tone for 5s |
 | 12 | `20` | 0: Key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
 | 16 | `20` | 0: key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
 | 17 | `20` | 0: Roof light on for 5s, 1: Roof light on for 5s (same?) |
 | 19 | `20` | 0: Roof light off, 1: Roof light on for 5s, 2: Roof light auto mode? in ACC on for 5s, in ON fade out and off for 5s |
-| 20 | `00` | _Supported PIDs 21-3f bitmask_: 84 00 00 6d |
+| 20 || _Supported PIDs 21-3f bitmask_: 84 00 00 6d |
 | 21 | `20` | 0: No-key dashboard light off for 5s, 1: No-key dashboard light on for 5s |
 | 26 | `00` | 0: nothing, 1: Trunk door open |
 | 3a | `20` | 0: Position/parking/side lights off for 5s, 1: Position/parking/side lights on for 5s |
 | 3b | `20` | 0: Low-/high-beam off for 5s, 1: Low-beam lights on for 5s, 2: High-beam lights on for 5s |
 | 3d | `20` | 0: Front fog lights off for 5s, 1: Front fog lights on for 5s |
 | 3e | `20` | 0: Rear fog lights off for 5s, 1: Rear fog lights on for 5s |
-| 40 | `00` | _Supported PIDs 41-5f bitmask_: 09 90 00 01 |
+| 40 || _Supported PIDs 41-5f bitmask_: 09 90 00 01 |
 | 45 | `20` | 0: Front wiper off for 5s, 1: Front wiper fast mode for 5s, 2: Front wiper slow mode for 5s, 3: front wiper one-shot mode |
 | 48 | `20` | 0: Rear wiper off for 5s, 1: Rear wiper on for 5s |
 | 49 | `00` | 0, 1: _TODO_ |
 | 4c | `20` | 0: Turn signals/blinkers off for 5s, 1: Right turn signal on, left off for 5s, 2: Left turn signal on, right off for 5s |
-| 60 | `00` | _Supported PIDs 61-7f bitmask_: 00 10 03 00 |
+| 60 || _Supported PIDs 61-7f bitmask_: 00 10 03 00 |
 | 69 || MISSING |
 | 77 | `20` | 0: Check oil dashboard light off for 5s, 1: Check oil dashboard light on for 5s |
 | 78 | `20` | 0, 1: _TODO_ |
@@ -224,7 +226,7 @@ This is the supported subset of the standard ECU service 01 PIDs just as [descri
 | 0d | Vehicle speed | km/h (A) | `00` |
 | 0f | Intake air temperature | °C (A-40) | `51` |
 | 10 | [Mass air flow sensor (MAF)](https://en.wikipedia.org/wiki/Mass_airflow_sensor) air flow rate | grams/sec (1/100(256A+B)) | `00 00` |
-| 11 | Throttle position | % (100/255 A) | `00` |
+| 11 | Throttle position (doesn't seem to work, always 0?) | % (100/255 A) | `00` |
 | 1c | OBD standards this vehicle conforms to | enum | `06` (EOBD-Europe) |
 | 20 | _Supported PIDs 21-3f bitmask_ || `a0 01 80 00` |
 | 21 | Distance traveled with malfunction indicator lamp (MIL) on | km (256A+B) | `00 00` |
@@ -250,23 +252,23 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | PID | Meaning | Unit (format) | Captured value |
 | --: | --- | --- | --- |
 | 2000 | _Supported PIDs 2001-201f bitmask_ || `ff bf 14 59` |
-| 2001 | Battery voltage | 1/16th V / LSB | `0c 6a` |
-| 2002 | _TODO_ || `00 50` |
-| 2003 | _TODO_ || `00 00` |
-| 2004 | _TODO_ || `32 00` |
-| 2005 | _TODO_ || `04 cf` |
+| 2001 | Some engine temperature reading || `0c 6a` |
+| 2002 | Engine speed/revolutions | 0.5 RPM / LSB | `00 50` |
+| 2003 | Vehicle absolute speed || `00 00` |
+| 2004 | Varies with engine load, could be pressure value, similar to `180: C.8-D.5` but higher resolution || `32 00` |
+| 2005 | Battery voltage | 0.01 V / LSB | `04 cf` |
 | 2006 | Car odometer absolute value (mileage) | km / LSB | `01 fd ad` |
-| 2007 | (Same as 2001?) Battery voltage | 1/16th V / LSB | `0c 6a` |
-| 2008 | _TODO_ || `0c 4e` |
+| 2007 | (Same as 2001?) Some engine temperature reading || `0c 6a` |
+| 2008 | A different engine temperature reading  || `0c 4e` |
 | 2009 | _TODO_ || `03 b8` |
-| 200b | _TODO_ || `02 e6` |
-| 200c | _TODO_ || `01 73` |
-| 200d | _TODO_ || `00 5b` |
-| 200e | _TODO_ || `01` |
-| 200f | _TODO_ || `00` |
+| 200b | Raw accelerator/throttle pedal angle (unclamped) || `02 e6` |
+| 200c | Raw accelerator/throttle pedal angle (unclamped) || `01 73` |
+| 200d | Some engine temperature reading || `00 5b` |
+| 200e | Ignition in ON position || `01` |
+| 200f | Brake pedal position: 0 when released, 1 when foot on pedal (barely pressed), 2 when pressed enough for the braking light to come on || `00` |
 | 2010 | _TODO_ || `00` |
-| 2014 | _TODO_ || `00` |
-| 2016 | _TODO_ || `00` |
+| 2014 | 1 when engine running || `00` |
+| 2016 | 1 when engine running || `00` |
 | 201a | _TODO_ || `00` |
 | 201c | _TODO_ || `00` |
 | 201d | _TODO_ || `00` |
@@ -274,15 +276,15 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 2021 | _TODO_ || `13 8d` |
 | 2022 | _TODO_ || `13 8d` |
 | 2023 | _TODO_ || `13 8d` |
-| 2024 | _TODO_ || `0c 80` |
-| 2025 | _TODO_ || `01` |
-| 2026 | _TODO_ || `01` |
-| 2028 | _TODO_ || `03` |
+| 2024 | Seems to be the idle RPM setpoint, changes with current demand | 0.25 RPM / LSB | `0c 80` |
+| 2025 | 2 when brake pedal pressed (light on), 1 otherwise || `01` |
+| 2026 | 2 when brake pedal pressed (light on), 1 otherwise || `01` |
+| 2028 | Some dashboard lights? || `03` |
 | 202d | _TODO_ || `00` |
-| 202e | _TODO_ || `00 00` |
+| 202e | Accelerator/throttle pedal angle scaled to 0-3ff range but not clamped at 75% || `00 00` |
 | 2035 | _TODO_ || `ff` |
 | 2036 | _TODO_ || `00` |
-| 2037 | _TODO_ || `2b ed` |
+| 2037 | Varies with engine load, could be pressure value, same as `160: A.8-B.5` but higher resolution || `2b ed` |
 | 2039 | _TODO_ || `0f 95` |
 | 203a | _TODO_ || `01` |
 | 203b | _TODO_ || `01` |
@@ -294,44 +296,44 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 2041 | _TODO_ || `01` |
 | 2042 | _TODO_ || `00` |
 | 2043 | _TODO_ || `01` |
-| 2044 | _TODO_ || `00 00` |
+| 2044 | Accelerator/throttle pedal angle scaled to 0-3ff range, clamped at 75% stroke || `00 00` |
 | 2045 | _TODO_ || `03` |
 | 2046 | _TODO_ || `00` |
 | 2047 | _TODO_ || `01` |
-| 2048 | _TODO_ || `01` |
+| 2048 | 1 when engine stopped, 2 when running || `01` |
 | 204a | _TODO_ || `00` |
 | 204b | _TODO_ || `00` |
-| 204c | _TODO_ || `00` |
+| 204c | 0 when cruise control disabled, 1 when limit speed engaged, 2 when setting limit speed, 5 when setting cruise speed, other values TODO || `00` |
 | 204d | _TODO_ || `00` |
 | 204e | _TODO_ || `24` |
 | 204f | _TODO_ || `80` |
-| 2050 | _TODO_ || `00 00` |
+| 2050 | Vehicle absolute speed || `00 00` |
 | 2051 | _TODO_ || `00` |
 | 2052 | _TODO_ || `00` |
 | 2053 | _TODO_ || `01` |
-| 2054 | _TODO_ || `07` |
+| 2054 | 1 when engine stopped, 7 when running? nope, something else || `07` |
 | 2055 | _TODO_ || `07` |
-| 2056 | _TODO_ || `00` |
-| 2057 | _TODO_ || `00 06` |
+| 2056 | 1 when engine running, 0 when stopped, 7 for a short while after stopping? || `00` |
+| 2057 | Engine load-related value || `00 06` |
 | 2058 | _TODO_ || `00` |
-| 2059 | _TODO_ || `00` |
-| 205a | _TODO_ || `08` |
+| 2059 | ASCD Clutch switch, 0 when release, 1 when depressed || `00` |
+| 205a | 4 when RPMs above idle, 8 when engine stopped, 0x40 when idle.  Values 2 and 0x20 seen briefly while going from higher RPMs to idle || `08` |
 | 205b | _TODO_ || `00` |
-| 205c | _TODO_ || `01` |
-| 205d | _TODO_ || `01` |
+| 205c | 0 when IGN in OFF or ACC, 1 when in ON || `01` |
+| 205d | 0 when accelerator/throttle pedal pressed, 1 when released || `01` |
 | 205f | _TODO_ || `0f a0` |
 | 2060 | _Supported PIDs 2061-207f bitmask_ || `ff ee 01 ff` |
-| 2061 | _TODO_ || `32 00` |
-| 2062 | _TODO_ || `32 00` |
-| 2063 | _TODO_ || `32 00` |
-| 2064 | _TODO_ || `2b ed` |
-| 2065 | _TODO_ || `2b ed` |
-| 2066 | _TODO_ || `06 13` |
-| 2067 | _TODO_ || `0d ad` |
-| 2068 | _TODO_ || `0d ad` |
-| 2069 | _TODO_ || `00 00` |
-| 206a | _TODO_ || `00 00` |
-| 206b | _TODO_ || `00 00` |
+| 2061 | Varies with engine load, could be a pressure value, similar to `180: C.8-D.5` but higher resolution || `32 00` |
+| 2062 | Varies with engine load, could be a pressure value, similar to `180: C.8-D.5` but higher resolution || `32 00` |
+| 2063 | Varies with engine load, could be a pressure value, different from `180: C.8-D.5` || `32 00` |
+| 2064 | Battery voltage? Varies with engine RPM || `2b ed` |
+| 2065 | Varies with engine load, could be a pressure value || `2b ed` |
+| 2066 | Varies with engine load and RPMs || `06 13` |
+| 2067 | Varies with engine load, could be a pressure value || `0d ad` |
+| 2068 | Varies with engine load, could be a pressure value || `0d ad` |
+| 2069 | Varies with engine load, could be fuel consumption or a pressure value || `00 00` |
+| 206a | Engine running time in seconds (resets when ECU starts?) || `00 00` |
+| 206b | Engine running time in seconds (resets every time IGN goes from OFF to ON?) || `00 00` |
 | 206d | _TODO_ || `01` |
 | 206e | _TODO_ || `01` |
 | 206f | _TODO_ || `f0` |
@@ -476,7 +478,7 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 2407 | _TODO_ || `00 00` |
 | 2408 | _TODO_ || `7e 70` |
 | 2409 | _TODO_ || `83 2c` |
-| 240b | _TODO_ || `03 b7` |
+| 240b | Same as 2401? _TODO_ || `03 b7` |
 | 240d | _TODO_ || `0c 6c` |
 | 240f | _TODO_ || `01` |
 | 2410 | _TODO_ || `93 88` |
@@ -577,7 +579,7 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 24ba | _TODO_ || `00 00` |
 | 24bb | _TODO_ || `00 00 00` |
 | 24bc | _TODO_ || `00 00 fc` |
-| 24bd | _TODO_ || `0b 32` |
+| 24bd | Same as 247f? _TODO_ || `0b 32` |
 | 24be | _TODO_ || `03 a5` |
 | 24c0 | _Supported PIDs 24c1-24df bitmask_ || `47 7f ef 31` |
 | 24c2 | _TODO_ || `7f f9` |
@@ -641,14 +643,14 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 | 2540 | _Supported PIDs 2541-255f bitmask_ || `ff ff e0 01` |
 | 2541 | _TODO_ || `80 00` |
 | 2542 | _TODO_ || `80 00` |
-| 2543 | _TODO_ || `01 fd ad` |
+| 2543 | Car odometer absolute value (mileage) | km / LSB || `01 fd ad` |
 | 2544 | _TODO_ || `00` |
 | 2545 | _TODO_ || `80 00` |
 | 2546 | _TODO_ || `00 00` |
 | 2547 | _TODO_ || `01` |
 | 2548 | _TODO_ || `01` |
 | 2549 | _TODO_ || `00` |
-| 254a | _TODO_ || `06 19` |
+| 254a | Same as 242c? _TODO_ || `06 19` |
 | 254b | _TODO_ || `00 00` |
 | 254c | _TODO_ || `00 00` |
 | 254d | _TODO_ || `00 00` |
@@ -852,7 +854,6 @@ Data available on some cars but not available on Nissan Qashqai J10 or yet to be
 * Fuel level
 * Outside temperature
 * Outside brightness level (bright/dark, from the Light & Rain sensor)
-* ASCD clutch switch
 * Seatbelt status and occupancy sensor status other than driver
 * Car VIN
 * Current time and/or date
