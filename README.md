@@ -64,12 +64,12 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 ||
 | 1f9 | `A.7`     | A/C on while engine running | boolean, 1 when true ||
 | 1f9 | `A.4`     | A/C on while engine running (after A/C off, goes to 0 before `A.7`) | boolean, 1 when true ||
-| 1f9 | `C.8-D.2` | Engine RPM, same as `180 / A.8-B.2` |||
+| 1f9 | `C.8-D.2` | Engine RPM, same as `180: A.8-B.2` |||
 ||
 | 215 | `B.7`     | Reverse gear / reverse light | boolean, 1 when in reverse ||
 ||
 | 280 | `B.8-D.5` | A rapidly changing sensor value -- reacts to longitudinal axis acceleration |||
-| 280 | `E.8-F.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
+| 280 | `E.8-F.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
 | 280 | `G.8-1`   | A rapidly changing sensor value -- reacts to longitudinal axis acceleration | 2's complement 16-bit integer, positive when force towards front, i.e. when parked on a downward slope or decelerating, negative on upward slope or accelerating ||
 ||
 | 284 | `A.8-B.1` | Front right wheel absolute speed | 16-bit unsigned integer, 0 when stopped, positive when rolling in either direction | 1/175th km/h / LSB (7000 at 40kmh) |
@@ -88,7 +88,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 2de | `E.2`     | Efficiency unit is l/100km, as opposed to MPG or km/l | boolean, 1 when l/100km ||
 | 2de | `G.8-H.1` | Distance-to-empty -- range at current fuel economy and fuel left (minus reserve, i.e. 0 km when fuel gauge in red zone), as shown on one of the dashboard panels | 16-bit unsigned integer | 0.1 km / LSB rounded to 1 km (10 LSBs) -- when efficiency unit set to l/100km |
 ||
-| 354 | `A.8-B.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
+| 354 | `A.8-B.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer | 0.01 km/h / LSB (slightly higher) |
 | 354 | `E.7`     | ESP (VDC/TCS) disable button | boolean, 1 when button in ||
 | 354 | `E.6`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
 | 354 | `E.4`     | ESP (VDC/TCS) off dash light | boolean, 1 when light on ||
@@ -96,8 +96,8 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 354 | `E.1`     | ABS? off dash light | boolean, 1 when light on ||
 | 354 | `G.5`     | Brake pedal switch / brake light / stop light | boolean, 1 when foot on pedal ||
 ||
-| 355 | `A.8-B.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
-| 355 | `C.8-D.1` | Vehicle absolute speed, similar to `284/E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `A.8-B.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `C.8-D.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer ||
 ||
 | 358 | `A.1`     | Key inserted | boolean, 1 when key in ignition ||
 | 358 | `B.7`     | Blower fan on (climate control) | boolean, 1 when fan running ||
@@ -167,11 +167,11 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 
 ## BCM diagnostic action PIDs (commands)
 
-These are the BCM's service 0x30 PIDs that can be used to send commands and only send commands (there don't seem to be any useful queries).  The service listens on address **0x745** and replies on address **0x765** but it allows communication only [as documented by Brad370z here](https://projectbytes.wordpress.com/2015/07/08/nissan-370z-can-control/).
+These are the BCM's service 0x30 PIDs that can be used to send commands and only send commands (there don't seem to be any useful information queries).  The service listens on address **0x745** and replies on address **0x765** but it allows communication only [as documented by Brad370z here](https://projectbytes.wordpress.com/2015/07/08/nissan-370z-can-control/), i.e. in a diagnostic session.  SID 0x30 is known as "I/O control by local ID" in some protocols.
 
 These commands toggle the different lights, actuators, speakers and other devices connected to the BCM, plus it seems the BCM will automatically request power to the right rails on the car from the IPDM-E/R so that the commands mostly work even when the car is completely off.  The changes will time out after 5 seconds so these seem to be strictly diagnostic commands for quickly testing the different devices.  At the same time it seems the changes can be extended in time by resending the commands before the 5s run out.
 
-As documented by Brad370z each command consists of the service number `0x30`, the PID number, the function byte and the requested value.
+As documented by Brad370z each command consists of the service number `0x30`, the PID/CID number, the function byte and the requested value.
 Three functions seem to available:
 
 | Function byte | Description |
@@ -180,7 +180,7 @@ Three functions seem to available:
 | `0x01` | Queries whether given value is supported by this PID.  Every PID supports this function |
 | `0x20` | Causes a temporary 5-second change to a device's state |
 
-Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the value 0 does nothing.  For function `0x20` the value 0 disables a device temporarily if it's on, and cancels a previously requested value that hasn't timed out yet.  For example if the left turn signal is currently blinking because the turn signal & wiper switch (stick/lever) is in the left position, requesting value will 1 will start blinking the right turn signal (and disable the left turn signal) for 5 seconds.  Requesting value 0 will disable either turn signal for 5s whether it was requested with the physical switch or a diagnostic command.
+Most PID/CIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the value 0 does nothing.  For function `0x20` the value 0 disables a device temporarily if it's on, and cancels a previously requested value that hasn't timed out yet.  For example if the left turn signal is currently blinking because the turn signal & wiper switch (stick/lever) is in the left position, requesting value will 1 will start blinking the right turn signal (and disable the left turn signal) for 5 seconds.  Requesting value 0 will disable either turn signal for 5s whether it was requested with the physical switch or a diagnostic command.
 
 | PID | Function (`0x00`/`0x20`) | Values |
 | --: | :-: | --- |
@@ -211,11 +211,11 @@ Most PIDs support values 0 (off) and 1 (on).  For function `0x00` requesting the
 | 77 | `20` | 0: Check oil dashboard light off for 5s, 1: Check oil dashboard light on for 5s |
 | 78 | `20` | 0, 1: _TODO_ |
 
-## ECU diagnostic action PIDs (commands)
+## Engine ECU diagnostic action PIDs (commands)
 
 The engine computer seems to have its own service 0x30 to trigger diagnostic actions, with a similar syntax to the BCM's service 0x30.  The service 0x30 commands as well as the diagnostic session request (`02 10 c0`) now need to be sent to address **7e0** instead of **745**.  The function byte is always `00` and the value byte is apparently ignored, so the functions and values are not listed below.
 
-These commands can't be used when the engine is running, error `22` (conditionsNotCorrect) is returned if they're attempted with the engine running.  Similarly some of the commands return error `22` if a previous related command is still in effect.  The PIDs may be specific to the K9K engine or a subset of engines.
+These commands can't be used when the engine is running, error `22` (conditionsNotCorrect) is returned if they're attempted with the engine running.  Similarly some of the commands return error `22` if a previous related command is still in effect.  The PID/CIDs may be specific to the K9K engine or a subset of engines.
 
 | PID | Action |
 | --: | --- |
@@ -273,7 +273,7 @@ As before this is the supported subset of the standard ECU service 09 PIDs just 
 
 ## Non-standard service 22 PIDs
 
-These are the manufacturer-specific service 22 PIDs that can be queried for current values from sensors, internal BCM/ECU state and/or hardcoded information.  They're read in the same way as services 01 and 09 except for the PID numbers being 16-bit.
+These are the manufacturer-specific service 22 PID/CIDs that can be queried for current values from sensors, internal BCM/Engine state and/or hardcoded information.  They're read in the same way as services 01 and 09 except for the PID/CID numbers being 16-bit.  SID 0x22 is known as "Read Data by Common Identifier" (CID, or Data Identifier - DID)
 
 | PID | Meaning | Unit (format) | Captured value |
 | --: | --- | --- | --- |
@@ -872,20 +872,24 @@ These are the manufacturer-specific service 22 PIDs that can be queried for curr
 
 ## Non-standard service 21 PIDs
 
-These are some manufacturer-specific service 21 PIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks.  I currently have no information on what any of those values actually mean.
+These are some manufacturer-specific service 21 PID/CIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
 
-| PID | Captured value |
-| --: | --- |
-| 80 | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 01 01 01 88` (ascii BB36AF4BE0669R) |
-| 81 | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
-| 82 | `95 03 00 00 00 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
-| 84 | `34 42 45 46 31 33 30 32 31 33 35 31 33 30 35 32 31 20 20 20` (ascii 4BEF1302135130521) |
-| f0 | `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R)
-| f1 | `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
-| fc | `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R) |
-| fd | `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
-| fe | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 02 01 00 88` (ascii BB36AF4BE0669R) |
-| ff | `42 42 33 31 41 4e 4d 55 4b 00 45 4f 4c 50 47 01 13 02 26 13 22 5c b8 12` (ascii BB31ANMUK EOLPG) |
+| PID | Name | Captured value |
+| --: | --- | --- |
+| 80 || `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 01 01 01 88` (ascii BB36AF4BE0669R) |
+| 81 | VIN | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 82 || `95 03 00 00 00 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 84 || `34 42 45 46 31 33 30 32 31 33 35 31 33 30 35 32 31 20 20 20` (ascii 4BEF1302135130521) |
+| f0 | Product Number long | `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R)
+| f1 || `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
+| fc || `33 36 31 30 52 46 34 42 45 30 36 36 39 52 00 f4 31 00 00 00 01 01 00 88` (ascii 3610RF4BE0669R) |
+| fd || `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
+| fe | Product Number | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 02 01 00 88` (ascii BB36AF4BE0669R) |
+| ff | HW Number| `42 42 33 31 41 4e 4d 55 4b 00 45 4f 4c 50 47 01 13 02 26 13 22 5c b8 12` (ascii BB31ANMUK EOLPG) |
+
+## Non-standard service 0x23 (ROM dump)
+
+Apparently the Engine ECU (address **7e0**) and the BCM (address **745**) implement service 0x23 but I've been unable to get any data out of them so far.  SID 0x23 is known as "Read Memory by Address" in some procotols.  The message syntax is [as described in this blog post](https://leftoverpi.com/2020/01/23/reading-a-370z-ecu-rom/), i.e. the command consists of the length byte (`07`), the Service ID (`23`), the 32-bit big-endian read start address and the 16-bit big-endian number of bytes to read, e.g. `07 23 00 00 12 34 00 3f` to request 63 bytes starting at memory address 0x1234.  The command returns error `0x7f` if attempted in the normal session mode.  In that (370Z-specific) blog post those commands are executed in the `0xfb` session (`elevatedDiagSession`) but that mode is not supported on the J10 Qashqai.  However, executing the command in session `0xc0` mode (`startDiagSession`) resolves the `0x7f` error.  Instead error `0x12` (`subFunctionNotSupported-invalidFormat`) is then returned as if the start address was incorrect.  More research needed.
 
 ## TO DO
 
