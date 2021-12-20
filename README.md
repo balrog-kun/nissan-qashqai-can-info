@@ -237,6 +237,21 @@ These commands can't be used when the engine is running, error `22` (conditionsN
 | 42 | _TODO_ |
 | 43 | _TODO_ |
 
+## IPDM-E/R diagnostic action PIDs (commands)
+
+These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU at address **74f**.  Like before diagnostic session `0xc0` required.
+
+| PID | Function (`0x00`/`0x20`) | Values |
+| --: | :-: | --- |
+| 00 || _Supported PIDs 01-1f bitmask_: `0b d2 00 00` |
+| 05 | 00 | 0: nothing, 1: Very short honk |
+| 07 | 20 | 0: Rear window defogging (defrost) off for 5s, 1: Rear window defogging (defrost) on for 5s |
+| 08 | 20 | 0: Front wipers off for 5s, 1: Front wipers run slow for 5s, 2: Front wiper run fast for 5s |
+| 09 | 20 | 0: Radiator off for 5s, 1, 2, 3: Run the radiator at different speeds | `` |
+| 0a | 20 | 0, 1: _TODO_ triggers some big relay on for 5s |
+| 0c | 00 | 0, 1: _TODO_ |
+| 0f | 20 | 0: Front lights off for 5s, 1: Low/high-beam off for 5s, 2: Position and high-beam off for 5s, 3: Blink high-beam, position lights off for 5s, 4: Front fog lights on and low/high-beam/position lights off for 5s |
+
 ## Standard service 01 PIDs (current data)
 
 This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.  The queries are sent to the address **7e0** and the replies are returned from address **7e8**.
@@ -404,7 +419,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2107 | _TODO_ || `01 a8 a2` |
 | 2108 | _TODO_ || `00 00 00` |
 | 2109 | _TODO_ || `00 0a` |
-| 210a | _TODO_ || `37 37` |
+| 210a | A km counter || `37 37` |
 | 210b | _TODO_ || `00 1f` |
 | 210c | _TODO_ || `5e ce` |
 | 210d | _TODO_ || `00 f2 14 a8` |
@@ -877,11 +892,11 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 | PID | Meaning | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `c0 00 00 01` |
-| 01 | _TODO_ | `d7 0a fc 95 28 04 20 d5 11 34 21 14 1e 98 14 cd 06 02 00 89 b8 02 0f bc 02 80 98 a0 00 00 40 88 88 00` |
-| 02 | _TODO_ | `42 52 30 33 30` (ascii BR030) |
-| 20 || _Supported PIDs 21-3f bitmask_: `80 00 00 01` |
+| 01 || `d7 0a fc 95 28 04 20 d5 11 34 21 14 1e 98 14 cd 06 02 00 89 b8 02 0f bc 02 80 98 a0 00 00 40 88 88 00` |
+| 02 || `42 52 30 33 30` (ascii BR030) |
+| 20 | _Supported PIDs 21-3f bitmask_ | `80 00 00 01` |
 | 21 | _TODO_ | `90 8c df` |
-| 40 || _Supported PIDs 41-5f bitmask_: `df fd 90 00` |
+| 40 | _Supported PIDs 41-5f bitmask_ | `df fd 90 00` |
 | 41 | `A.8`: IGN in ON, `A.7`: emergency lights switch, `A.6`: right turn switch, `A.5`: left turn switch, `A.4`: brake pedal (brake light switch) | `80 00 00 00 00` |
 | 42 | `A.8`: IGN in ON, `A.7`: key inserted, `A.6`: driver door open, `A.5`: passenger door open, `A.4`: rear right door open, `A.3`: rear left door open`, `C.4`: IGN in ACC or ON, others _TODO_ | `c0 00 08 00 00 00 00 00` |
 | 44 | `A.8`: IGN in ON, `A.7`: key inserted, `A.6`: driver door open, `A.4`: lights selector in the 3rd or 4th position, i.e. low-beam lights and/or position lights are on -- but 0 when the same lights are on in AUTO or triggered by the fog lights switch -- this bit strictly depends on the selector position, `A.1`: passenger door open, `B.8`: rear right door open, `B.7`: rear left door open`, `B.6`: trunk door open, others _TODO_ | `c0 00 00 00 00` |
