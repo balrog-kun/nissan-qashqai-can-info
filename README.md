@@ -920,10 +920,11 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 | 92 || `05` |
 | 94 || `00` |
 
-## Engine non-standard service 21 PIDs
+## Other ECUs non-standard service 21 PIDs
 
-These are some manufacturer-specific service 21 PID/CIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
+These are some manufacturer-specific service 21 PID/LIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks for the LIDs after 0x80.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
 
+Address **745** (Engine ECU / ECM / ECMD?) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 80 || `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 01 01 01 88` (ascii BB36AF4BE0669R) |
@@ -936,6 +937,45 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 | fd || `30 30 30 30 30 46 46 4f 49 58 20 20 20 20 20 00 13 02 13 01 58 5c e5 63` (ascii 00000FFOIX) |
 | fe | Product Number | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 02 01 00 88` (ascii BB36AF4BE0669R) |
 | ff | HW Number| `42 42 33 31 41 4e 4d 55 4b 00 45 4f 4c 50 47 01 13 02 26 13 22 5c b8 12` (ascii BB31ANMUK EOLPG) |
+
+Address **74d** (IPDM-E/R) LIDs:
+| PID | Name | Captured value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | `c0 01 00 00` |
+| 01 || `d5 00 00 00 00` |
+| 02 || `f0 40 27 c3 00 bc 05 d8 04` |
+| 10 || `2f 30 ff 0f 32 00 be 9d 00 cc 01 00 00 00 00 00 00 f0` |
+| 82 || `32 4c ff 01 01 ff ff 01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 83 || `4a 44 30 32 44 0d 44 08 07 00 00 00 00 00 76 35 2e 30 72 31 00 00 00 80` (ascii JD02D v5.0r1) |
+| 91 || `0f 0a 14 0a 02` |
+| 93 || `78 9e 28 03 7c 06 02 13 3b 00 00 00 00 00 00 00 00 00 00 00` |
+| 95 || `00` |
+| 97 || `00` |
+
+Address **742** (EPS?) LIDs -- requires diagnostic session `0xc0`:
+| PID | Name | Captured value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | `c4 00 00 00` |
+| 01 || `0b f8 03 00 00 00 00 00 00 00 43 64 00 00 80 00 00 44 00 00 00` |
+| 02 || `01` |
+| 06 || `94 94 94 94 94 a2 a2 a2 a2 a2 a2` |
+| 82 || `32 4c 01 00 01 00 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff` |
+| 83 || `42 52 30 31 44 42 41 05 02 39 43 30 31 35 87 00 00 00 01 01 00 00 00 80` (ascii BR01DBA 9C015) |
+| 84 || `31 36 33 33 32 31 38 32 34 37 ff ff ff ff ff ff ff ff ff ff` (ascii 1633218247) |
+
+Address **743** (4WAS?) LIDs:
+| PID | Name | Captured value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | `e0 00 00 00` |
+| 01 || `00 00 00 00 00 00 00 01 fd ec 00 00 33 45 00 00 10 0c 00 00 40 00 00 00 00 00 00 00 00 00 00 00 98 00 01 1e a0 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fe 00 00 41 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 02 || `fc fb fe 00 20 80 00 10 00 00 00 00 02 9a 07 e0 80 00 00 00 00 00 e4 00 00 00 00 00` |
+| 03 || `03 03 03 00 ff ff 00 00 27 ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff` |
+| 82 || `00 00 ff ff 01 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 83 || `42 52 35 30 45 14 46 02 18 01 06 06 08 06 00 01 00 16 00 01 ff ff ff 80` (ascii BR50E) |
+| f0 || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| f1 || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| fe || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| ff || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 
 ## Non-standard service 0x23 (ROM dump)
 
