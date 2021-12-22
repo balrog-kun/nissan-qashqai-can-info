@@ -239,7 +239,7 @@ These commands can't be used when the engine is running, error `22` (conditionsN
 
 ## IPDM-E/R diagnostic action PIDs (commands)
 
-These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU at address **74f**.  Like before diagnostic session `0xc0` required.
+These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **74d**.  Like before diagnostic session `0xc0` required.
 
 | PID | Function (`0x00`/`0x20`) | Values |
 | --: | :-: | --- |
@@ -298,7 +298,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2003 | Vehicle absolute speed || `00 00` |
 | 2004 | Varies with engine load, could be pressure value, similar to `180: C.8-D.5` but higher resolution || `32 00` |
 | 2005 | Battery voltage | 0.01 V / LSB | `04 cf` |
-| 2006 | Car odometer absolute value (mileage) | km / LSB | `01 fd ad` |
+| 2006 | Car odometer absolute value (mileage) | km | `01 fd ad` |
 | 2007 | (Same as 2001?) Some engine temperature reading || `0c 6a` |
 | 2008 | A different engine temperature reading  || `0c 4e` |
 | 2009 | _TODO_ || `03 b8` |
@@ -421,8 +421,8 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2109 | _TODO_ || `00 0a` |
 | 210a | A km counter || `37 37` |
 | 210b | _TODO_ || `00 1f` |
-| 210c | _TODO_ || `5e ce` |
-| 210d | _TODO_ || `00 f2 14 a8` |
+| 210c | _TODO_, a counter, increases faster than km count || `5e ce` |
+| 210d | _TODO_, a down counter || `00 f2 14 a8` |
 | 210e | Absolute engine revolution conuter? Updates when stopping engine || `01 e0 51 22` |
 | 210f | _TODO_ || `00` |
 | 2110 | _TODO_ || `01 c6 76` |
@@ -511,25 +511,25 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 228b | _TODO_ || `01 54` |
 | 2400 | _Supported PIDs 2401-241f bitmask_ || `ff ab 62 05` |
 | 2401 | _TODO_ || `03 b7` |
-| 2402 | _TODO_ || `04 55` |
-| 2403 | _TODO_ || `02 0e` |
-| 2404 | _TODO_ || `06 5b` |
+| 2402 | _TODO_, a sensor value, goes up with RPMs || `04 55` |
+| 2403 | _TODO_, a sensor value, goes down with RPMs || `02 0e` |
+| 2404 | _TODO_, a sensor value, some noise || `06 5b` |
 | 2405 | _TODO_ || `88 00` |
-| 2406 | _TODO_ || `7c 31` |
-| 2407 | _TODO_ || `00 00` |
-| 2408 | _TODO_ || `7e 70` |
-| 2409 | _TODO_ || `83 2c` |
+| 2406 | _TODO_, engine temperature? || `7c 31` |
+| 2407 | _TODO_, non-linear relation to RPMs and revving the engine up/down || `00 00` |
+| 2408 | _TODO_, non-linear relation to RPMs and revving the engine up/down || `7e 70` |
+| 2409 | _TODO_, a noisy sensor || `83 2c` |
 | 240b | Same as 2401? _TODO_ || `03 b7` |
-| 240d | _TODO_ || `0c 6c` |
+| 240d | _TODO_, goes up with RPMs || `0c 6c` |
 | 240f | _TODO_ || `01` |
 | 2410 | _TODO_ || `93 88` |
-| 2412 | _TODO_ || `00 00` |
-| 2413 | _TODO_ || `1d bc` |
-| 2417 | _TODO_ || `11 7e` |
-| 241e | _TODO_ || `09` |
+| 2412 | _TODO_, goes up with RPMs  || `00 00` |
+| 2413 | _TODO_, goes up with RPMs || `1d bc` |
+| 2417 | _TODO_, some engine sensor, little noise || `11 7e` |
+| 241e | _TODO_, goes to 0 when engine running, quickly back to 9 when stopped || `09` |
 | 2420 | _Supported PIDs 2421-243f bitmask_ || `9f d5 fd f1` |
-| 2421 | _TODO_ || `0b 65` |
-| 2424 | _TODO_ || `0e a1` |
+| 2421 | _TODO_, non-linear relation to RPMs and revving the engine up/down || `0b 65` |
+| 2424 | _TODO_, up with engine load || `0e a1` |
 | 2425 | _TODO_ || `07 2e` |
 | 2426 | _TODO_ || `07 25` |
 | 2427 | _TODO_ || `00 c9` |
@@ -545,18 +545,18 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2434 | _TODO_ || `00` |
 | 2435 | _TODO_ || `80 00` |
 | 2436 | _TODO_ || `80 00` |
-| 2438 | _TODO_ || `0a aa` |
-| 2439 | _TODO_ || `0e 92` |
-| 243a | _TODO_ || `54 62` |
+| 2438 | _TODO_, 0x2986 when running, then back to 0xaaa || `0a aa` |
+| 2439 | _TODO_, up with RPMs then down over 20-30 seconds || `0e 92` |
+| 243a | _TODO_, varies with engine load || `54 62` |
 | 243b | _TODO_ || `09 1a` |
 | 243c | _TODO_ || `54 62` |
 | 2440 | _Supported PIDs 2441-245f bitmask_ || `c7 08 00 01` |
-| 2441 | _TODO_ || `15 5b` |
-| 2442 | _TODO_ || `0d a1` |
-| 2446 | _TODO_ || `01 e3` |
-| 2447 | _TODO_ || `00 00` |
-| 2448 | _TODO_ || `03 ac` |
-| 244d | _TODO_ || `0c bd` |
+| 2441 | _TODO_, counter, goes faster with higher RPMs || `15 5b` |
+| 2442 | _TODO_ || `0d a1` | dc6 after run, ea4 when running, f12 when running
+| 2446 | _TODO_, up with RPMs || `01 e3` |
+| 2447 | _TODO_, up with RPMs || `00 00` |
+| 2448 | _TODO_, up with RPMs || `03 ac` |
+| 244d | _TODO_, down when engine running then slowly recovers || `0c bd` |
 | 2460 | _Supported PIDs 2461-247f bitmask_ || `ff fc 4b a7` |
 | 2461 | _TODO_ || `00 00 00 03 00 00 00 3c 00 00 00 03 00 00 00 7d 00 00 00 0d 00 00 01 3f 00 00 00 0e 00 00 00 f8 00 00 00 04 00 00` |
 | 2462 | _TODO_ || `00 00 00 00 00 00 00 00 00 67 00 3f 00 80 01 4c 01 06` |
@@ -572,7 +572,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 246c | _TODO_ || `12 15 14 04 15 10 1b 17 17 01` |
 | 246d | _TODO_ || `00` |
 | 246e | _TODO_ || `a7 10` |
-| 2472 | _TODO_ || `01 fd ad` |
+| 2472 | Car odometer absolute value (mileage) | km | `01 fd ad` |
 | 2475 | _TODO_ || `80 00` |
 | 2477 | _TODO_ || `01` |
 | 2478 | _TODO_ || `01` |
@@ -601,14 +601,14 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24a6 | _TODO_ || `02 26` |
 | 24a7 | _TODO_ || `04 4c` |
 | 24a8 | _TODO_ || `00` |
-| 24a9 | _TODO_ || `01 fc b1` |
+| 24a9 | _TODO_, odometer snapshot when? doesn't update on every trip || `01 fc b1` |
 | 24aa | _TODO_ || `00` |
 | 24ab | _TODO_ || `00` |
 | 24ac | _TODO_ || `02 23 e2` |
 | 24ad | _TODO_ || `02 24 bb` |
 | 24ae | _TODO_ || `02 24 bb` |
 | 24af | _TODO_ || `02` |
-| 24b0 | _TODO_ || `01 fd ad` |
+| 24b0 | _TODO_, odometer snapshot when? updates on every trip || `01 fd ad` |
 | 24b1 | _TODO_ || `01 a4` |
 | 24b2 | _TODO_ || `74` |
 | 24b3 | _TODO_ || `01` |
@@ -620,7 +620,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24ba | _TODO_ || `00 00` |
 | 24bb | _TODO_ || `00 00 00` |
 | 24bc | _TODO_ || `00 00 fc` |
-| 24bd | Same as 247f? _TODO_ || `0b 32` |
+| 24bd | Same as 247f, _TODO_ || `0b 32` |
 | 24be | _TODO_ || `03 a5` |
 | 24c0 | _Supported PIDs 24c1-24df bitmask_ || `47 7f ef 31` |
 | 24c2 | _TODO_ || `7f f9` |
@@ -631,15 +631,15 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24cb | _TODO_ || `00` |
 | 24cc | _TODO_ || `00` |
 | 24cd | _TODO_ || `00` |
-| 24ce | _TODO_ || `80 00` |
-| 24cf | _TODO_ || `02 07` |
+| 24ce | _TODO_, varies with engine load || `80 00` |
+| 24cf | _TODO_, varies with engine load, slowly goes back to earlier values || `02 07` |
 | 24d0 | _TODO_ || `00` |
 | 24d1 | _TODO_ || `80 00` |
 | 24d2 | _TODO_ || `80 00` |
 | 24d3 | _TODO_ || `00 00` |
 | 24d5 | _TODO_ || `13 97` |
 | 24d6 | _TODO_ || `13 97` |
-| 24d7 | _TODO_ || `03 ba` |
+| 24d7 | _TODO_, goes up with RPMs || `03 ba` |
 | 24d8 | _TODO_ || `00` |
 | 24db | _TODO_ || `01` |
 | 24dc | _TODO_ || `02` |
@@ -654,8 +654,8 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24ec | _TODO_ || `00 15 b6 89` |
 | 24ed | _TODO_ || `03 03 03 00 05 04 03 03 0a 06` |
 | 24ef | _TODO_ || `00 ab 00 ae 00 82 00 28 00 21 00 24 00 09 00 6e 00 03 00 05` |
-| 24f0 | _TODO_ || `01 fd a9` |
-| 24f1 | _TODO_ || `01 fd ad` |
+| 24f0 | _TODO_, odometer snapshot when? doesn't update on every trip || `01 fd a9` |
+| 24f1 | _TODO_, odometer snapshot when? doesn't update on every trip || `01 fd ad` |
 | 24f2 | _TODO_ || `00 00` |
 | 24f3 | _TODO_ || `09 1a` |
 | 24f4 | _TODO_ || `00` |
@@ -684,7 +684,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2540 | _Supported PIDs 2541-255f bitmask_ || `ff ff e0 01` |
 | 2541 | _TODO_ || `80 00` |
 | 2542 | _TODO_ || `80 00` |
-| 2543 | Car odometer absolute value (mileage) | km / LSB | `01 fd ad` |
+| 2543 | Car odometer absolute value (mileage) | km | `01 fd ad` |
 | 2544 | _TODO_ || `00` |
 | 2545 | _TODO_ || `80 00` |
 | 2546 | _TODO_ || `00 00` |
@@ -883,7 +883,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | fdbb | _TODO_ || `00` |
 | fdbc | _TODO_ || `00 20 00 20 00 20 00 20` |
 | fee0 | _Supported PIDs fee1-feff bitmask_ || `00 00 00 02` |
-| feff | MISSING (query returns error) |||
+| feff | MISSING (query returns error 12) |||
 
 ## BCM non-standard service 21 PIDs
 
@@ -938,7 +938,7 @@ Address **745** (Engine ECU / ECM / ECMD?) LIDs:
 | fe | Product Number | `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 02 01 00 88` (ascii BB36AF4BE0669R) |
 | ff | HW Number| `42 42 33 31 41 4e 4d 55 4b 00 45 4f 4c 50 47 01 13 02 26 13 22 5c b8 12` (ascii BB31ANMUK EOLPG) |
 
-Address **74d** (IPDM-E/R) LIDs:
+Address **74d** (IPDM-E/R or BCM?) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `c0 01 00 00` |
@@ -963,19 +963,19 @@ Address **742** (EPS?) LIDs -- requires diagnostic session `0xc0`:
 | 83 || `42 52 30 31 44 42 41 05 02 39 43 30 31 35 87 00 00 00 01 01 00 00 00 80` (ascii BR01DBA 9C015) |
 | 84 || `31 36 33 33 32 31 38 32 34 37 ff ff ff ff ff ff ff ff ff ff` (ascii 1633218247) |
 
-Address **743** (4WAS?) LIDs:
+Address **743** (Instrument panel/Odometer) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `e0 00 00 00` |
-| 01 || `00 00 00 00 00 00 00 01 fd ec 00 00 33 45 00 00 10 0c 00 00 40 00 00 00 00 00 00 00 00 00 00 00 98 00 01 1e a0 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fe 00 00 41 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 01 | Bytes 4-5 and 6-7: speedometer, bytes 8-10: odometer, bytes 11-12: engine RPMs (0.125 RPM unit), byte 14: engine coolant temperature - `6d` middle of gauge, `5b` bottom, bytes 17,18,33: dashboard lights, byte 17 bit 7: ESP/TCS off, bit 5: change oil?, bit 4: any door open, byte 33 bit 8: handbrake, bit 4: driver seatbelt undone, byte 63: cruise control state - `10` - speed limiter engaged, `20` - setting limit speed, `50` - setting cruise speed, byte 64: cruise control speed setpoint - `fe` when unset | `00 00 00 00 00 00 00 01 fd ec 00 00 33 45 00 00 10 0c 00 00 40 00 00 00 00 00 00 00 00 00 00 00 98 00 01 1e a0 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fe 00 00 41 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | 02 || `fc fb fe 00 20 80 00 10 00 00 00 00 02 9a 07 e0 80 00 00 00 00 00 e4 00 00 00 00 00` |
 | 03 || `03 03 03 00 ff ff 00 00 27 ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff` |
 | 82 || `00 00 ff ff 01 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
 | 83 || `42 52 35 30 45 14 46 02 18 01 06 06 08 06 00 01 00 16 00 01 ff ff ff 80` (ascii BR50E) |
-| f0 || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| f0 | Product Number long | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | f1 || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
-| fe || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
-| ff || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| fe | Product Number | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| ff | HW Number| `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 
 ## Non-standard service 0x23 (ROM dump)
 
