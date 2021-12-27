@@ -237,6 +237,43 @@ These commands can't be used when the engine is running, error `22` (conditionsN
 | 42 | _TODO_ |
 | 43 | _TODO_ |
 
+Some or all of these may correspond to test commands (_TODO: find matches_), not this list is a mix of lists from different ECUs:
+| ID | Action |
+| --: | --- |
+| AC001 | Preheating unit |
+| AC004 | Turbocharging solenoid valve |
+| AC005 | Injector cylinder 1 (0c2001) |
+| AC006 | Injector cylinder 2 (0c2002) |
+| AC007 | Injector cylinder 3 (0c2004) |
+| AC008 | Injector cylinder 4 (0c2008) |
+| AC011 | Rail pressure regulator |
+| AC012 | Damper valve |
+| AC015 | Fuel pump relay (2d2001) |
+| AC017 | Canister bleed solenoid valve |
+| AC018 | Upstream O2 sensor heating |
+| AC019 | Downstream O2 sensor heating |
+| AC027 | Motorised fuel valve |
+| AC031 | Heating element no. 3 relay |
+| AC038 | Low speed fan assembly relay |
+| AC039 | High speed fan assembly relay |
+| AC047 | OBD warning light |
+| AC063 | Heating element no. 1 relay |
+| AC064 | Heating element no. 2 relay |
+| AC068 | Injection fault warning light |
+| AC069 | Severe injection fault warning light |
+| AC070 | Air conditioning compressor |
+| AC109 | Idle regulation valve |
+| AC116 | Coolant temperature warning light |
+| AC180 | Air conditioning compressor relay control |
+| AC195 | Electric cooland pump |
+| AC211 | Fuel pump (2820000) |
+| AC250 | Heating resistor no. 1 relay |
+| AC251 | Heating resistor no. 2 relay |
+| AC252 | Heating resistor no. 3 relay |
+| AC275 | Fan unit (4e2064) |
+| AC286 | Air inlet control flap on front end panel (67200100) |
+| AC293 | Starter relay (6f2004) |
+
 ## IPDM-E/R diagnostic action PIDs (commands)
 
 These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **74d**.  Like before diagnostic session `0xc0` required.
