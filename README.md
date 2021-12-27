@@ -350,7 +350,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2014 | [ET775] Camshaft TDC (Top Dead Centre) synchronisation, values COMPLETED/NOT COMPLETED, 1 when engine running || `00` |
 | 2016 | 1 when engine running || `00` |
 | 201a | bit 1: [ET134/ET160] Injector pre-heat relay command || `00` |
-| 201c | _TODO_ || `00` |
+| 201c | [PR303] Aux information, _TODO_ || `00` |
 | 201d | bits 3: [ET207] Thermoplunger 3 relay control, bit 2: [ET206] Thermoplunger 2 relay control, bit 1: [ET205] Thermoplunger 1 relay control. On K9K: [PR372] number of active glow-plugs? || `00` |
 | 2020 | _Supported PIDs 2021-203f bitmask_ || `fd 0c 0e ff` |
 | 2021 | [PR215] Sensor supply voltage no. 1, should be ~5V | mV | `13 8d` |
@@ -394,7 +394,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2054 | 1 when engine stopped, 7 when running? nope, something else || `07` |
 | 2055 | [ET838] Combustion mode setpoint: 1: Normal, 2: DPF regeneration start, 3: DPF regeneration, 4: DPF cooling, 5: NOx purge, 6: SOx purge, 7: Start, 8: Catalytic converter test, (spec values: NORMAL, STATUS1: Heating phase, STATUS2: Regeneration phase, STATUS3: Particle filter protection, STATUS4: Catalytic converted check) || `07` |
 | 2056 | [ET839] Combustion mode, same values as above and actual values should follow ET838 || `00` |
-| 2057 | [PR1029] Alternator power | 10 W | `00 06` |
+| 2057 | [PR306/PR1029] Alternator power | 10 W | `00 06` |
 | 2058 | K9K-specific: diesel fuel water-content status || `00` |
 | 2059 | ASCD Clutch switch, 0 when release, 1 when depressed || `00` |
 | 205a | 4 when RPMs above idle, 8 when engine stopped, 0x40 when idle.  Values 2 and 0x20 seen briefly while going from higher RPMs to idle || `08` |
@@ -522,7 +522,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2193 | _TODO_ || `00` |
 | 2194 | _TODO_ || `00` |
 | 2195 | Occasionally 1 when blower is on but not reliably || `00` |
-| 219a | _TODO_ || `00 00` |
+| 219a | [PR891] Preheating mode | 0.25 % | `00 00` |
 | 219b | _TODO_ || `00 05` |
 | 219c | _TODO_ || `00` |
 | 219d | _TODO_ || `ff ff` |
@@ -602,7 +602,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2442 | [PR382] DPF upstream temperature, goes above 600°C only during DPF regeneration | 0.1 °K (kelvin, aka. °C offset by -273) | `0d a1` |
 | 2443 | (Present on some ECUs) [PR414] DPF pressure differential | mBar offset by 0x8000 ||
 | 2446 | [PR1006] DPF pressure sensor reference voltage, up with RPMs up | mV | `01 e3` |
-| 2447 | [PR1005] Exhaust gas DPF flow rate | 0.1 m³/h | `00 00` |
+| 2447 | [PR1005/PR385] Exhaust gas DPF flow rate | 0.1 m³/h or 0.01 g/s? | `00 00` |
 | 2448 | [PR636] Reportedly turbo entry pressure | mBar | `03 ac` |
 | 244d | [PR1024] Estimated damper valve upstream temperature, down when engine running then slowly recovers || `0c bd` |
 | 2460 | _Supported PIDs 2461-247f bitmask_ || `ff fc 4b a7` |
@@ -629,14 +629,14 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 247e | _TODO_ || `00` |
 | 247f | _TODO_ || `0b 32` |
 | 2480 | _Supported PIDs 2481-249f bitmask_ || `ff 80 0f 81` |
-| 2481 | _TODO_ || `05` |
+| 2481 | [PR914] Successful regeneration count || `05` |
 | 2482 | _TODO_ || `00 00` |
 | 2483 | _TODO_ || `00 04` |
 | 2484 | _TODO_ || `00 01` |
 | 2485 | [PR848] Failed DPF regeneration attempts count || `01` |
 | 2486 | [PR1004] _TODO_ | 100/255 % | `00` |
 | 2487 | [PR1008] DPF last regeneration duration | s | `00 00` |
-| 2488 | Reportedly distance since last DPF regeneration || `12 ee` |
+| 2488 | [PR415] Reportedly time since last DPF regeneration | s | `12 ee` |
 | 2489 | [PR875] Oil viscosity reduction | 100/65536 % | `03 a4` |
 | 2495 | _TODO_ || `03 d4` |
 | 2496 | _TODO_ || `03 d4` |
@@ -693,13 +693,13 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24dc | _TODO_ || `02` |
 | 24e0 | _Supported PIDs 24e1-24ff bitmask_ || `67 7b ff d1` |
 | 24e2 | _TODO_ || `00 00` |
-| 24e3 | _TODO_ || `7f f9` |
+| 24e3 | [PR929] Total relative pressure in the DPF | mbar offset by 0x8000 | `7f f9` |
 | 24e6 | _TODO_ || `00` |
 | 24e7 | _TODO_ || `00` |
 | 24e8 | _TODO_ || `1f db` |
 | 24ea | _TODO_ || `00 00 00` |
 | 24eb | _TODO_ || `00 00` |
-| 24ec | _TODO_ || `00 15 b6 89` |
+| 24ec | [PR932] Engine oil dilution rate || `00 15 b6 89` |
 | 24ed | _TODO_ || `03 03 03 00 05 04 03 03 0a 06` |
 | 24ef | _TODO_ || `00 ab 00 ae 00 82 00 28 00 21 00 24 00 09 00 6e 00 03 00 05` |
 | 24f0 | _TODO_, odometer snapshot when? doesn't update on every trip || `01 fd a9` |
@@ -783,7 +783,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 280b | _TODO_ || `00 00` |
 | 280c | _TODO_ || `00 00` |
 | 280d | [PR1229] Injection system fuel flow rate | 0.01 mg/cp | `00 00` |
-| 280e | [PR988] Injector fuel flow rate | 0.01 mg/cp | `00 00` |
+| 280e | [PR988] Post injector fuel flow rate 1 | 0.01 mg/cp | `00 00` |
 | 2810 | _TODO_ || `80 00` |
 | 2811 | _TODO_ || `80 00` |
 | 2812 | _TODO_ || `80 00` |
@@ -798,7 +798,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2840 | _Supported PIDs 2841-285f bitmask_ || `00 00 00 01` |
 | 2860 | _Supported PIDs 2861-287f bitmask_ || `01 00 09 c1` |
 | 2868 | _TODO_ || `00 4a ff 9c` |
-| 2875 | _TODO_ || `00 00` |
+| 2875 | [PR304] Aux information, _TODO_ || `00 00` |
 | 2878 | bit 1: [ET826] Exhaust injector solenoid valve control || `00` |
 | 2879 | _TODO_ || `00 00` |
 | 287a | _TODO_ || `00` |
@@ -933,7 +933,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | fd78 | _TODO_ || `2c f5` |
 | fd79 | _TODO_ || `00` |
 | fd80 | _Supported PIDs fd81-fd9f bitmask_ || `57 f8 0f f9` |
-| fd82 | _TODO_ || `26 e0` |
+| fd82 | [PR224] Turbo pressure sensor voltage | 10 * 2^-16 V? | `26 e0` |
 | fd84 | [PR847] Inlet air temperature sensor voltage | 0.2 mV | `14 c9` |
 | fd86 | [PR782] Turbo entry pressure sensor voltage | 0.2 mV | `14 e0` |
 | fd87 | _TODO_ || `00 00` |
