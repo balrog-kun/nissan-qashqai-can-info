@@ -154,7 +154,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 | 60d | `B.1`     | Front fog lights on | boolean, 1 when on ||
 | 60d | `C.5`     | Any door locked | boolean, 1 when locked ||
 | 60d | `C.4`     | Any door locked | boolean, 1 when locked ||
-| 60d | `C.3`     | Read fog lights on | boolean, 1 when on ||
+| 60d | `C.3`     | Rear fog lights on | boolean, 1 when on ||
 | 60d | `D.6`     | Trunk door request / beep | boolean, 1 when on ||
 | 60d | `D.2`     | Trunk door request / beep | boolean, 1 when on ||
 ||
@@ -237,18 +237,13 @@ These commands can't be used when the engine is running, error `22` (conditionsN
 | 42 | _TODO_ |
 | 43 | _TODO_ |
 
-Some or all of these may correspond to test commands (_TODO: find matches_), not this list is a mix of lists from different ECUs:
+Some or all of these may correspond to test commands (_TODO: find matches_), note this list is a mix of lists from different ECUs:
 | ID | Action |
 | --: | --- |
 | AC001 | Preheating unit |
 | AC004 | Turbocharging solenoid valve |
-| AC005 | Injector cylinder 1 (0c2001) |
-| AC006 | Injector cylinder 2 (0c2002) |
-| AC007 | Injector cylinder 3 (0c2004) |
-| AC008 | Injector cylinder 4 (0c2008) |
 | AC011 | Rail pressure regulator |
 | AC012 | Damper valve |
-| AC015 | Fuel pump relay (2d2001) |
 | AC017 | Canister bleed solenoid valve |
 | AC018 | Upstream O2 sensor heating |
 | AC019 | Downstream O2 sensor heating |
@@ -265,14 +260,10 @@ Some or all of these may correspond to test commands (_TODO: find matches_), not
 | AC109 | Idle regulation valve |
 | AC116 | Coolant temperature warning light |
 | AC180 | Air conditioning compressor relay control |
-| AC195 | Electric cooland pump |
-| AC211 | Fuel pump (2820000) |
+| AC195 | Electric coolant pump |
 | AC250 | Heating resistor no. 1 relay |
 | AC251 | Heating resistor no. 2 relay |
 | AC252 | Heating resistor no. 3 relay |
-| AC275 | Fan unit (4e2064) |
-| AC286 | Air inlet control flap on front end panel (67200100) |
-| AC293 | Starter relay (6f2004) |
 
 ## IPDM-E/R diagnostic action PIDs (commands)
 
@@ -344,7 +335,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 200d | [PR872] Coolant pressure sensor voltage reading | 0.01 V | `00 5b` |
 | 200e | [ET001] Computer "+ after ignition" feed active -- it seems "+ after ignition" is the name of a specific electrical signal and this becomes 1 when that signal is on || `01` |
 | 200f | [ET759] Braking multiplex signal detected, one of ABSENT (0 -- when brake pedal fully released), PRESENT (2 -- when brake pedal depressed enough that the stop light comes on), INTERMEDIATE (1 -- foot on pedal, barely pressed) || `00` |
-| 2010 | [ET038] Engine status, one of: STOPPED (ign on without starter engaged), STALLED, RUNNING, STARTING, _TODO: assign values_ || `00` |
+| 2010 | [ET038] Engine status, one of: `00`: STOPPED (ign on without starter engaged), `20`: STALLED, `30`: RUNNING, `10`: STARTING || `00` |
 | 2011 | (Present on some ECUs) Reportedly engine coolant pressure | 0.1 bar ||
 | 2012 | (Present on some ECUs) [PR079] Reportedly atmospheric air pressure sensor voltage | mV ||
 | 2014 | [ET775] Camshaft TDC (Top Dead Centre) synchronisation, values COMPLETED/NOT COMPLETED, 1 when engine running || `00` |
@@ -365,7 +356,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2035 | [PR130] Cruise control setpoint, 0xff when disabled | km/h | `ff` |
 | 2036 | [ET673] Jammed accelerator/throttle pedal detected (command RZ001 clears this), or [PR1249] Brake pedal error? || `00` |
 | 2037 | Varies with engine load, could be pressure value, same as `160: A.8-B.5` but higher resolution || `2b ed` |
-| 2039 | [PR135] Cruise control/speed limiter buttons voltage -- each button's switch connects through a different resistance resulting in a voltage divider, voltage is ~4V normally, ~3V when "R" is pressed, ~2V when "+" is pressed, ~1V when "-" is pressed, ~0V when "O" is pressed,  | mV | `0f 95` |
+| 2039 | [PR135] Cruise control/speed limiter buttons voltage -- each button's switch connects through a different resistance resulting in a voltage divider, voltage is ~4V normally, ~3V when "R" is pressed, ~2V when "+" is pressed, ~1V when "-" is pressed, ~0V when "O" is pressed (actually seems to be ~3V for "+", ~2V for "-" and ~1V for Cancel) | mV | `0f 95` |
 | 203a | bit 1: [LC166] Cruise control function || `01` |
 | 203b | bit 1: [ET727] Cruise control disengaged ("Cruise control/Speed limiter connection after after cruise control button pressed", values DETECTED, NOT DETECTED) || `01` |
 | 203c | _TODO_ || `00` |
@@ -373,7 +364,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 203e | bit 1: [ET728] Speed limit disengaged ("Cruise control/Speed limiter connection after after speed limiter button pressed", values DETECTED, NOT DETECTED) || `01` |
 | 203f | _TODO_ || `00` |
 | 2040 | _Supported PIDs 2041-205f bitmask_ || `ff 7f ff fb` |
-| 2041 | [LC167] ASCD cruise control/speed limiter buttons || `01` |
+| 2041 | [LC167] ASCD cruise control/speed limiter buttons (doesn't seem to actually do anything) || `01` |
 | 2042 | _TODO_ || `00` |
 | 2043 | _TODO_ || `01` |
 | 2044 | Accelerator/throttle pedal angle scaled to 0-3ff range, clamped at 75% stroke || `00 00` |
@@ -382,7 +373,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2047 | bit 1: [ET760] First engine start, values COMPLETED/NOT COMPLETED || `01` |
 | 2048 | 1 when engine stopped, 2 when running || `01` |
 | 204a | bit 8: [ET820] High speed fan assembly final request, bit 7: [ET819] Low speed fan assembly final request, bit 6: [ET818] High speed fan assembly request by automatic gearbox, bit 5: [ET817] Low speed fan assembly request by automatic gearbox, bit 4: [ET816] High speed fan assembly request by air conditioning, bit 3: [ET815] Low speed fan assembly request by air conditioning, bit 2: [ET814] High speed fan assembly request by injection, bit 1: [ET813] Low speed fan assembly request by injection | bitmap | `00` |
-| 204b | [ET703] ASCD cruise control/speed limiter buttons, values: INACTIVE, INCREASE, DECREASE, SUSPEND, RESUME, CO.1 (open circuit or short circuit), INVALID || `00` |
+| 204b | [ET703] ASCD cruise control/speed limiter buttons, values: INACTIVE, INCREASE, DECREASE, SUSPEND, RESUME, CO.1 (open circuit or short circuit), INVALID -- doesn't seem to actually react to any buttons || `00` |
 | 204c | [ET413] Cruise control/Speed limit function, 0 when cruise control disabled, 1 when limit speed engaged, 2 when setting limit speed, 5 when setting cruise speed, other values TODO || `00` |
 | 204d | _TODO_ || `00` |
 | 204e | ASCD Cruise control status, bit 6: [ET792] Speed limiter inhibition by injection ("This indicates that the injection computer has requested deactivation of the speed limiter function for system reasons. This is a normal deactivation."), bit 5: [ET797] Speed unit change, bit 4: [ET796] No vehicle speed signal displayed ("This means that the injection computer has not received the vehicle speed displayed on the instrument panel"), bit 3: [ET795] No real vehicle speed signal ("This means that the real vehicle speed coming from the ABS was unavailable."), bit 2: [ET794] Displayed vehicle speed signal unavaiable | bitmap | `24` |
@@ -415,14 +406,14 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 206a | Engine running time in seconds (resets when ECU starts?) || `00 00` |
 | 206b | Engine running time in seconds (resets every time IGN goes from OFF to ON?) || `00 00` |
 | 206d | _TODO_ || `01` |
-| 206e | _TODO_, bit 1: [ET602] Brake switch? || `01` |
+| 206e | _TODO_, bit 1: [ET602] Brake switch? doesn't seem to react to brake pedal || `01` |
 | 206f | _TODO_ || `f0` |
 | 2078 | Occasionally 2, _TODO_ || `00` |
 | 2079 | bit 7: [ET835] Speed limiter system inhibition by injection, bit 6: [ET834] Cruise control system inhibition by injection, bit 5: [ET808] Handbrake, bit 4: [ET043] Cruise control, bit 3: [ET807] ESP/TCS - anti-yaw calibration, bit 2: [ET726] Reverse gear engagement, bit 1: [ET691] Engine start/stop switch || `00` |
-| 207a | [PR827] Resume ("R") button pressing duration, _TODO_ which button is this? | s | `00` |
-| 207b | [PR828] "+" button pressing duration | s | `00` |
-| 207c | [PR829] "-" button pressing duration | s | `00` |
-| 207d | [PR830] Suspend ("O") button pressing duration, _TODO_ which button is this? | s | `00` |
+| 207a | [PR827] Resume ("R") button pressing duration (doesn't actually do anything) | s | `00` |
+| 207b | [PR828] "+" button pressing duration (doesn't actually do anything) | s | `00` |
+| 207c | [PR829] "-" button pressing duration (doesn't actually do anything) | s | `00` |
+| 207d | [PR830] Suspend ("O") button pressing duration (doesn't actually do anything) | s | `00` |
 | 207e | [PR849] Number of abnormal cruise control/speed limiter transitions || `00` |
 | 207f | _TODO_ || `00` |
 | 2080 | _Supported PIDs 2081-209f bitmask_ || `ff 21 ff aa` |
@@ -532,11 +523,11 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2201 | (Present on some ECUs) [PR371] Error count |||
 | 2220 | _Supported PIDs 2221-223f bitmask_ || `ff de 00 01` |
 | 2221 | _TODO_ || `00` |
-| 2222 | [ET757] Some pedal signal, _TODO_ || `00` |
+| 2222 | [ET757] This is supposed to be some pedal signal but doesn't actually react to pedals || `00` |
 | 2223 | _TODO_ || `00` |
 | 2224 | _TODO_ || `00` |
-| 2225 | bit 1: [ET724] Speed signal multiplexer, _TODO_ || `00` |
-| 2226 | bit 1: [ET723] Vehicle speed being displayed || `00` |
+| 2225 | bit 1: [ET724] Speed signal multiplexer, _TODO_ doesn't react to speed || `00` |
+| 2226 | bit 1: [ET723] Vehicle speed being displayed, doesn't react to speed || `00` |
 | 2227 | _TODO_ || `00` |
 | 2228 | _TODO_ || `00` |
 | 2229 | [ET018] A/C on request || `01` |
@@ -572,7 +563,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2412 | [PR146] Air intake supply flow | 0.1 mg/cp | `00 00` |
 | 2413 | [PR180] Reportedly air supply configuration, goes up with RPMs | 0.1 mg/cp | `1d bc` |
 | 2417 | [PR774] Air inlet valve position sensor voltage, a little noise | mV | `11 7e` |
-| 241e | [ET774] Turbochaging pressure control/turbocharger regulation, _TODO_, goes to 0 when engine running, quickly back to 9 when stopped || `09` |
+| 241e | [ET774] Turbochaging pressure control/turbocharger regulation, goes to 0 when engine running, quickly back to 9 when stopped || `09` |
 | 2420 | _Supported PIDs 2421-243f bitmask_ || `9f d5 fd f1` |
 | 2421 | [PR018] Estimated airflow | 0.1 mg/cp | `0b 65` |
 | 2422 | (Present on some ECUs) Reportedly mass airflow | 0.05 kg/h ||
@@ -598,7 +589,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 243b | [PR1046] Temperature upstream from catalytic converter | 0.1 °K (kelvin, aka. °C offset by -273) | `09 1a` |
 | 243c | _TODO_ || `54 62` |
 | 2440 | _Supported PIDs 2441-245f bitmask_ || `c7 08 00 01` |
-| 2441 | [PR381] DPF downstream temperature, goes above 550°C only during DPF regeneration -- goes up with RPMs, _TODO_ | 0.1 °K (kelvin, aka. °C offset by -273) | `15 5b` |
+| 2441 | [PR381] DPF downstream temperature, goes above 550°C only during DPF regeneration -- goes up with RPMs | 0.1 °K (kelvin, aka. °C offset by -273) | `15 5b` |
 | 2442 | [PR382] DPF upstream temperature, goes above 600°C only during DPF regeneration | 0.1 °K (kelvin, aka. °C offset by -273) | `0d a1` |
 | 2443 | (Present on some ECUs) [PR414] DPF pressure differential | mBar offset by 0x8000 ||
 | 2446 | [PR1006] DPF pressure sensor reference voltage, up with RPMs up | mV | `01 e3` |
@@ -636,7 +627,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2485 | [PR848] Failed DPF regeneration attempts count || `01` |
 | 2486 | [PR1004] _TODO_ | 100/255 % | `00` |
 | 2487 | [PR1008] DPF last regeneration duration | s | `00 00` |
-| 2488 | [PR415] Reportedly time since last DPF regeneration | s | `12 ee` |
+| 2488 | [PR415] Time since last DPF regeneration, updates every second | s | `12 ee` |
 | 2489 | [PR875] Oil viscosity reduction | 100/65536 % | `03 a4` |
 | 2495 | _TODO_ || `03 d4` |
 | 2496 | _TODO_ || `03 d4` |
@@ -680,7 +671,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 24cc | _TODO_ || `00` |
 | 24cd | _TODO_ || `00` |
 | 24ce | _TODO_, varies with engine load || `80 00` |
-| 24cf | [PR542] EGR valve potentiometer voltage when closed according to one description, DPF pressure differential according to another, varies with engine load, slowly goes back to earlier values | mBar offset by 0x8000? | `02 07` |
+| 24cf | [PR542] EGR valve potentiometer voltage when closed according to one description, DPF pressure differential according to another (doesn't match readings), varies with engine load, slowly goes back to earlier values || `02 07` |
 | 24d0 | _TODO_ || `00` |
 | 24d1 | _TODO_ || `80 00` |
 | 24d2 | [PR1025] Air inlet valve position setpoint || `80 00` |
@@ -741,7 +732,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2547 | _TODO_ || `01` |
 | 2548 | _TODO_ || `01` |
 | 2549 | _TODO_ || `00` |
-| 254a | Reportedly Weight of soot in the DPF | 0.01 g | `06 19` |
+| 254a | Reportedly Weight of soot in the DPF (matches PR383) | 0.01 g | `06 19` |
 | 254b | _TODO_ || `00 00` |
 | 254c | _TODO_ || `00 00` |
 | 254d | _TODO_ || `00 00` |
@@ -806,7 +797,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2882 | (Present on some ECUs) [ET605] Fuel pump relay |||
 | 2c00 | _Supported PIDs 2c01-2c1f bitmask_ || `30 00 00 01` |
 | 2c03 | _TODO_ || `01` |
-| 2c04 | bit 8: [ET041] Trans. gearbox ratio, this is supposed to indicate the gear currently engaged or declutched status, but doesn't seem to work || `01` |
+| 2c04 | [ET041] Trans. gearbox ratio, 0: in reverse gear (as soon as lever moved to reverse), 1: neutral or declutched (most of the time), 2: 1st gear, 3: 2nd gear, 4: 3rd gear, 5: 4th gear, 6: 5th gear, 7: 6th gear, switches to values 2-7 only when the gear is actually engaged and clutch fully released || `01` |
 | 2c20 | _Supported PIDs 2c21-2c3f bitmask_ || `00 10 00 01` |
 | 2c2c | _TODO_ || `00` |
 | 2c40 | _Supported PIDs 2c41-2c5f bitmask_ || `00 00 00 00` |
@@ -1007,7 +998,7 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 
 These are some manufacturer-specific service 21 PID/LIDs that can be queried for ECU information.  They're read in the same way as services 01 and 09 but there are no supported PID bitmasks for the LIDs after 0x80.  SID 0x21 is known as "Read Data by Local Identifier" in some protocols.
 
-Address **745** (Engine ECU / ECM / ECMD?) LIDs:
+Address **7e0** (Engine ECU / ECM / ECMD?) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 80 || `42 42 33 36 41 46 34 42 45 30 36 36 39 52 00 f4 31 0e e6 a1 01 01 01 88` (ascii BB36AF4BE0669R) |
@@ -1051,7 +1042,7 @@ Address **742** (EPS?) LIDs -- requires diagnostic session `0xc0`:
 | 83 || `42 52 30 31 44 42 41 05 02 39 43 30 31 35 87 00 00 00 01 01 00 00 00 80` (ascii BR01DBA 9C015) |
 | 84 || `31 36 33 33 32 31 38 32 34 37 ff ff ff ff ff ff ff ff ff ff` (ascii 1633218247) |
 
-Address **743** (Instrument panel/Odometer) LIDs:
+Address **743** (Instrument cluster/Odometer) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `e0 00 00 00` |
