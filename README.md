@@ -482,7 +482,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2129 | 1 when engine stopped, 0 when running || `01` |
 | 212a | _TODO_ || `00` |
 | 212b | _TODO_ || `00` |
-| 212c | _TODO_ || `2c 01 fc 3c 01 fc 42 01 fc 6f 01 fc 6f 01 fc 70 01 fc 70 01 fc 70 01 fc 70 01 fd 4f 01 fd 55 01 fd 70 01 fd 71 01 fd 71 01 fd 72 01 fd 92 01 fd 93 01 fd 94 01 fd 95 01 fd 95 01 fd 9c` |
+| 212c | _TODO_, 20 odometer snapshots from oldest to newest -- from DTC time? what's in the first byte? || `2c 01 fc 3c 01 fc 42 01 fc 6f 01 fc 6f 01 fc 70 01 fc 70 01 fc 70 01 fc 70 01 fd 4f 01 fd 55 01 fd 70 01 fd 71 01 fd 71 01 fd 72 01 fd 92 01 fd 93 01 fd 94 01 fd 95 01 fd 95 01 fd 9c` |
 | 212d | _TODO_ || `00 10 9a 02 00 00 00 00 00 c0 00 78 76 74 72 70 6e 6c 6b 69 67 66 64 62 61 5f 5e 02 07 02 06 02 06 01 06 02 06 02 06 01 06 02 06 01 06 03 06` |
 | 2140 | _Supported PIDs 2141-215f bitmask_ || `00 00 00 03` |
 | 215f | 1 if engine has been started since ECU boot? || `00` |
@@ -575,7 +575,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2429 | [PR129] Last EGR valve offset | 0.01% | `02 10` |
 | 242a | [PR128] First EGR valve offset | 0.01% | `01 bf` |
 | 242c | [PR383] Weights of soot in the DPF, should never exceed 39g (but it does on some cars) | 0.01 g | `06 19` |
-| 242e | _TODO_ || `04 de` |
+| 242e | Same as PR1012 in CID `24a5` || `04 de` |
 | 2430 | _TODO_ || `00 00` |
 | 2431 | _TODO_ || `00 00` |
 | 2432 | [PR1009] DPF upstream temperature setpoint | 0.1 °K (kelvin, aka. °C offset by -273) | `23 2b` |
@@ -605,7 +605,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2466 | _TODO_ || `00 00 00 00 00 00 00 00 01 01` |
 | 2467 | _TODO_ || `00 00 00 00 00 02 02 00 00 00` |
 | 2468 | _TODO_ || `08 17 20 07 16 19 00 0a 17 1b` |
-| 2469 | _TODO_ || `5a 4b 3d 35 2c 16 1b 24 20 1c` |
+| 2469 | _TODO_, seems to be a queue, new value occasionally appears in the last byte and the other bytes are shifted to front || `5a 4b 3d 35 2c 16 1b 24 20 1c` |
 | 246a | _TODO_ || `00 00 00 00 00 00 00 00 00 00` |
 | 246b | _TODO_ || `02 04 0a 00 02 04 08 00 02 04 08 00 02 04 08 00 02 04 0a 00` |
 | 246c | _TODO_ || `12 15 14 04 15 10 1b 17 17 01` |
@@ -620,14 +620,14 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 247e | _TODO_ || `00` |
 | 247f | _TODO_ || `0b 32` |
 | 2480 | _Supported PIDs 2481-249f bitmask_ || `ff 80 0f 81` |
-| 2481 | [PR914] Successful regeneration count || `05` |
+| 2481 | [PR914] Successful DPF regeneration count || `05` |
 | 2482 | _TODO_ || `00 00` |
 | 2483 | _TODO_ || `00 04` |
 | 2484 | _TODO_ || `00 01` |
-| 2485 | [PR848] Failed DPF regeneration attempts count || `01` |
+| 2485 | [PR848] Failed DPF regeneration attempts count (since last successful one?) || `01` |
 | 2486 | [PR1004] _TODO_ | 100/255 % | `00` |
 | 2487 | [PR1008] DPF last regeneration duration | s | `00 00` |
-| 2488 | [PR415] Time since last DPF regeneration, updates every second | s | `12 ee` |
+| 2488 | [PR415] Time since last DPF regeneration, updates every second, wraps around | s | `12 ee` |
 | 2489 | [PR875] Oil viscosity reduction | 100/65536 % | `03 a4` |
 | 2495 | _TODO_ || `03 d4` |
 | 2496 | _TODO_ || `03 d4` |
@@ -949,7 +949,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | fda8 | (Present on some ECUs) [PR1235] Low-pressure sensor voltage? | 0.2 mV ||
 | fdb6 | [PR864] Fuel supply regulation valve OCR || `00 00` |
 | fdb7 | [PR850] Fuel supply current setpoint | mA | `00 00` |
-| fdb8 | [PR007/PR739] Rail pressure regulstor current setpoint | ~3 mA | `00 19` |
+| fdb8 | [PR007/PR739] Rail pressure regulator current setpoint | ~3 mA | `00 19` |
 | fdb9 | [PR048] Rail pressure regulation valve OCR (opening cycle ratio) || `00 00` |
 | fdba | [PR006] Rail pressure regulator current (should be 1600 mA or 1400+/-50 mA and in any case within 5 mA of PR007) | ~3 mA | `00 19` |
 | fdbb | _TODO_ || `00` |
@@ -966,10 +966,10 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 | PID | Meaning | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `c0 00 00 01` |
-| 01 || `d7 0a fc 95 28 04 20 d5 11 34 21 14 1e 98 14 cd 06 02 00 89 b8 02 0f bc 02 80 98 a0 00 00 40 88 88 00` |
+| 01 | _TODO_ (the key fob remote IDs could be somewhere here) | `d7 0a fc 95 28 04 20 d5 11 34 21 14 1e 98 14 cd 06 02 00 89 b8 02 0f bc 02 80 98 a0 00 00 40 88 88 00` |
 | 02 || `42 52 30 33 30` (ascii BR030) |
 | 20 | _Supported PIDs 21-3f bitmask_ | `80 00 00 01` |
-| 21 | _TODO_ | `90 8c df` |
+| 21 | BCM serial number in the first 5 digits (this can be used for PIN calculation with utilities like http://keytechtools.com/bcmcodes/index.php) | `90 8c df` |
 | 40 | _Supported PIDs 41-5f bitmask_ | `df fd 90 00` |
 | 41 | `A.8`: IGN in ON, `A.7`: emergency lights switch, `A.6`: right turn switch, `A.5`: left turn switch, `A.4`: brake pedal (brake light switch) | `80 00 00 00 00` |
 | 42 | `A.8`: IGN in ON, `A.7`: key inserted, `A.6`: driver door open, `A.5`: passenger door open, `A.4`: rear right door open, `A.3`: rear left door open`, `C.4`: IGN in ACC or ON, others _TODO_ | `c0 00 08 00 00 00 00 00` |
@@ -987,12 +987,12 @@ These are some manufacturer-specific service 21 PID/CIDs that can be queried for
 | 50 | `A.8`: IGN in ON or START, `A.6`: key inserted, other bits _TODO_ | `d0 40 c0 00 00` |
 | 51 | `A.8`: IGN in ON or START, `A.7`: brake pedal depressed (braking light on), other bits _TODO_ | `80 00 00 00 00` |
 | 54 | `A.6`: blower fan on, `A.5`: TODO, `A.2,1`: TODO (1 after engine stopped, 2 when running?), `B.8-1`: might be coolant temperature, `C.8-1` might be battery voltage, `E.8-1`: engine revolutions / RPMs, `F.8-1` might be intake temperature, other bits _TODO_ | `81 53 9f 00 00 3a 00 00 00 00 00` |
-| 82 || `32 4c 01 01 01 ff 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 01 ff ff ff ff ff ff ff ff ff ff ff 00` |
-| 83 || `42 52 30 32 41 45 44 03 17 00 05 03 68 01 11 00 00 00 00 00 00 00 00 80` (ascii BR02AED) |
-| 90 || `0b b8` |
-| 91 || `03 e8` |
-| 92 || `05` |
-| 94 || `00` |
+| 82 | _TODO_ (Partially matches PID `82` on addresses **74d**, **742**) | `32 4c 01 01 01 ff 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 01 ff ff ff ff ff ff ff ff ff ff ff 00` |
+| 83 | `A.8-E.1`: The second half of the part number, the whole of which is `284B2-BR02A` in my case (as printed on the BCM box label), `F.8-1`: Diag ID, `G.8-I.1`: Supplier code, `L.8-M.1`: One of the BCM encrypted PINs printed on the BCM box label, `J.8-N.1`: Hardware ID?, `O.8-P.1`: Software ID?, `Q.8-R.1`: Edition ID, `S.8-T.1`: Calibration ID?, `Y.8-1`: Manufacture date? | `42 52 30 32 41 45 44 03 17 00 05 03 68 01 11 00 00 00 00 00 00 00 00 80` (ascii BR02AED) |
+| 90 | _TODO_ | `0b b8` (3000) |
+| 91 | _TODO_ | `03 e8` (1000) |
+| 92 | _TODO_ | `05` |
+| 94 | _TODO_ | `00` |
 
 ## Other ECUs non-standard service 21 PIDs
 
@@ -1024,8 +1024,8 @@ Address **74d** (IPDM-E/R or BCM?) LIDs:
 | 01 || `d5 00 00 00 00` |
 | 02 || `f0 40 27 c3 00 bc 05 d8 04` |
 | 10 || `2f 30 ff 0f 32 00 be 9d 00 cc 01 00 00 00 00 00 00 f0` |
-| 82 || `32 4c ff 01 01 ff ff 01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
-| 83 || `4a 44 30 32 44 0d 44 08 07 00 00 00 00 00 76 35 2e 30 72 31 00 00 00 80` (ascii JD02D v5.0r1) |
+| 82 | (Partially matches PID `82` on addresses **745**, **742**) | `32 4c ff 01 01 ff ff 01 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
+| 83 | `A.8-E.1`: The second half of the part number, `F.8-1`: Diag ID, `G.8-I.1`: Supplier code?, `J.8-N.1`: Hardware ID?, `O.8-P.1`: Software ID?, `Q.8-R.1`: Edition ID, `S.8-T.1`: Calibration ID?, `Y.8-1`: Manufacture date? | `4a 44 30 32 44 0d 44 08 07 00 00 00 00 00 76 35 2e 30 72 31 00 00 00 80` (ascii JD02D v5.0r1) |
 | 91 || `0f 0a 14 0a 02` |
 | 93 || `78 9e 28 03 7c 06 02 13 3b 00 00 00 00 00 00 00 00 00 00 00` |
 | 95 || `00` |
@@ -1038,19 +1038,19 @@ Address **742** (EPS?) LIDs -- requires diagnostic session `0xc0`:
 | 01 || `0b f8 03 00 00 00 00 00 00 00 43 64 00 00 80 00 00 44 00 00 00` |
 | 02 || `01` |
 | 06 || `94 94 94 94 94 a2 a2 a2 a2 a2 a2` |
-| 82 || `32 4c 01 00 01 00 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff` |
-| 83 || `42 52 30 31 44 42 41 05 02 39 43 30 31 35 87 00 00 00 01 01 00 00 00 80` (ascii BR01DBA 9C015) |
+| 82 | (Partially matches PID `82` on addresses **745**, **74d**) | `32 4c 01 00 01 00 01 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff` |
+| 83 | `A.8-E.1`: The second half of the part number, `F.8-1`: Diag ID, `G.8-I.1`: Supplier code?, `J.8-N.1`: Hardware ID?, `O.8-P.1`: Software ID?, `Q.8-R.1`: Edition ID, `S.8-T.1`: Calibration ID?, `Y.8-1`: Manufacture date? | `42 52 30 31 44 42 41 05 02 39 43 30 31 35 87 00 00 00 01 01 00 00 00 80` (ascii BR01DBA 9C015) |
 | 84 || `31 36 33 33 32 31 38 32 34 37 ff ff ff ff ff ff ff ff ff ff` (ascii 1633218247) |
 
 Address **743** (Instrument cluster/Odometer) LIDs:
 | PID | Name | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `e0 00 00 00` |
-| 01 | Bytes 4-5 and 6-7: speedometer, bytes 8-10: odometer, bytes 11-12: engine RPMs (0.125 RPM unit), byte 14: engine coolant temperature - `6d` middle of gauge, `5b` bottom, bytes 17,18,33: dashboard lights, byte 17 bit 7: ESP/TCS off, bit 5: change oil?, bit 4: any door open, byte 33 bit 8: handbrake, bit 4: driver seatbelt undone, byte 63: cruise control state - `10` - speed limiter engaged, `20` - setting limit speed, `50` - setting cruise speed, byte 64: cruise control speed setpoint - `fe` when unset | `00 00 00 00 00 00 00 01 fd ec 00 00 33 45 00 00 10 0c 00 00 40 00 00 00 00 00 00 00 00 00 00 00 98 00 01 1e a0 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fe 00 00 41 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
+| 01 | Bytes 4-5 and 6-7: speedometer, bytes 8-10: odometer, bytes 11-12: engine RPMs (0.125 RPM unit), byte 13: fuel level in litres?, byte 14: engine coolant temperature - `6d` middle of gauge, `5b` bottom, bytes 17,18,33: dashboard lights, byte 17 bit 7: ESP/TCS off, bit 5: change oil?, bit 4: any door open, byte 33 bit 8: handbrake, bit 4: driver seatbelt undone, byte 38: outside temperature in °C offset by 40 °C, byte 63: cruise control state - `10` - speed limiter engaged, `20` - setting limit speed, `50` - setting cruise speed, byte 64: cruise control speed setpoint - `fe` when unset | `00 00 00 00 00 00 00 01 fd ec 00 00 33 45 00 00 10 0c 00 00 40 00 00 00 00 00 00 00 00 00 00 00 98 00 01 1e a0 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fe 00 00 41 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | 02 || `fc fb fe 00 20 80 00 10 00 00 00 00 02 9a 07 e0 80 00 00 00 00 00 e4 00 00 00 00 00` |
 | 03 || `03 03 03 00 ff ff 00 00 27 ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff 27 ff ff ff ff ff` |
 | 82 || `00 00 ff ff 01 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
-| 83 || `42 52 35 30 45 14 46 02 18 01 06 06 08 06 00 01 00 16 00 01 ff ff ff 80` (ascii BR50E) |
+| 83 | `A.8-E.1`: The second half of the part number, `F.8-1`: Diag ID?, `G.8-I.1`: Supplier code?, `J.8-N.1`: Hardware ID?, `O.8-P.1`: Software ID?, `Q.8-R.1`: Edition ID, `S.8-T.1`: Calibration ID?, `Y.8-1`: Manufacture date? | `42 52 35 30 45 14 46 02 18 01 06 06 08 06 00 01 00 16 00 01 ff ff ff 80` (ascii BR50E) |
 | f0 | Product Number long | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | f1 || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | fe | Product Number | `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
