@@ -281,6 +281,10 @@ These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **7
 | 0c | 00 | 0, 1: _TODO_ |
 | 0f | 20 | 0: Front lights off for 5s, 1: Low/high-beam off for 5s, 2: Position and high-beam off for 5s, 3: Blink high-beam, position lights off for 5s, 4: Front fog lights on and low/high-beam/position lights off for 5s |
 
+## Messages 342 / 512 (PIN exchange)
+
+Frames with Msg IDs 342 / 512 (two of each) can be seen exchanged by ECUs when ignition is moved from ACC to ON.  See further description in [key.md](key.md).
+
 ## Standard service 01 PIDs (current data)
 
 This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.  The queries are sent to the address **7e0** and the replies are returned from address **7e8**.

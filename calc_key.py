@@ -1,4 +1,12 @@
-def calc_key(i):
+# Nissan ECU challenge-response calculation to produce the same values that are
+# exchanged in CAN-Bus message IDs 342 and 512 on ignition ON.  Both are 2-byte
+# (16-bit) values.
+#
+# Uses two LUT bitmaps for the values for which an arithmetic derivation is not
+# yet clear.  There's some regularity in these bitmaps.
+#
+# response = get_response(challenge)
+def get_response(i):
     val = ((i >> 8) + 0x97) & 0xff
     offset = val >> 6
     calc = (val * 5 + offset) & 0xff
