@@ -98,6 +98,7 @@ TODO: map values to their names in chart on service manual INL-38 or DLK-610.
 ||
 | 355 | `A.8-B.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer ||
 | 355 | `C.8-D.1` | Vehicle absolute speed, similar to `284: E.8-F.1` | 16-bit unsigned integer ||
+| 355 | `F.8-1`   | _TODO_ (Ambient brightness? unlikely) | 8-bit unsigned integer ||
 ||
 | 358 | `A.1`     | Key inserted | boolean, 1 when key in ignition ||
 | 358 | `B.7`     | Blower fan on (climate control) | boolean, 1 when fan running ||
@@ -574,7 +575,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2428 | [PR860] Last intake valve closed offset | 1/20.492% or 1/81.9691% | `00 cb` |
 | 2429 | [PR129] Last EGR valve offset | 0.01% | `02 10` |
 | 242a | [PR128] First EGR valve offset | 0.01% | `01 bf` |
-| 242c | [PR383] Weights of soot in the DPF, should never exceed 39g (but it does on some cars) | 0.01 g | `06 19` |
+| 242c | [PR383] Weight of soot in the DPF, should never exceed 39g (but it does on some cars) | 0.01 g | `06 19` |
 | 242e | Same as PR1012 in CID `24a5` || `04 de` |
 | 2430 | _TODO_ || `00 00` |
 | 2431 | _TODO_ || `00 00` |
@@ -598,7 +599,8 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 244d | [PR1024] Estimated damper valve upstream temperature, down when engine running then slowly recovers || `0c bd` |
 | 2460 | _Supported PIDs 2461-247f bitmask_ || `ff fc 4b a7` |
 | 2461 | _TODO_ || `00 00 00 03 00 00 00 3c 00 00 00 03 00 00 00 7d 00 00 00 0d 00 00 01 3f 00 00 00 0e 00 00 00 f8 00 00 00 04 00 00` |
-| 2462 | _TODO_ || `00 00 00 00 00 00 00 00 00 67 00 3f 00 80 01 4c 01 06` |
+                    00 00 00 11 00 00 00 ce 00 00 00 02 00 00 00 24 00 00 00 02 00 00 00 3f 00 00 00 11 00 00 00 f1 00 00 00 04 00 00
+| 2462 | _TODO_, seems to be a queue, new value occasionally appears in the last 2 bytes and the other bytes are shifted to front || `00 00 00 00 00 00 00 00 00 67 00 3f 00 80 01 4c 01 06` |
 | 2463 | _TODO_ || `ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
 | 2464 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
 | 2465 | _TODO_ || `00 00 00 00 00 02 01 02 02 02` |
@@ -620,11 +622,11 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 247e | _TODO_ || `00` |
 | 247f | _TODO_ || `0b 32` |
 | 2480 | _Supported PIDs 2481-249f bitmask_ || `ff 80 0f 81` |
-| 2481 | [PR914] Successful DPF regeneration count || `05` |
+| 2481 | [PR914] Successful DPF regeneration count (some regenerations aren't included, yet PR848 gets reset to 0) || `05` |
 | 2482 | _TODO_ || `00 00` |
 | 2483 | _TODO_ || `00 04` |
 | 2484 | _TODO_ || `00 01` |
-| 2485 | [PR848] Failed DPF regeneration attempts count (since last successful one?) || `01` |
+| 2485 | [PR848] Failed DPF regeneration attempt count (since last successful one, resets to 0 on successful regneration) || `01` |
 | 2486 | [PR1004] _TODO_ | 100/255 % | `00` |
 | 2487 | [PR1008] DPF last regeneration duration | s | `00 00` |
 | 2488 | [PR415] Time since last DPF regeneration, updates every second, wraps around | s | `12 ee` |
@@ -636,11 +638,11 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2499 | _TODO_ || `00` |
 | 24a0 | _Supported PIDs 24a1-24bf bitmask_ || `1f ff ef fd` |
 | 24a4 | _TODO_ || `00 01 01 00 01 01 01 01 00 00` |
-| 24a5 | [PR1012] Weight of soot in the DPF after regeneration | 0.01 g | `04 de` |
+| 24a5 | [PR1012] Weight of soot in the DPF after last regeneration attempt (either successful or failed) | 0.01 g | `04 de` |
 | 24a6 | _TODO_ || `02 26` |
 | 24a7 | _TODO_ || `04 4c` |
 | 24a8 | _TODO_ || `00` |
-| 24a9 | [PR1079] DPF mileage since last successful regeneration, updates when turning engine off || `01 fc b1` |
+| 24a9 | [PR1079] DPF mileage at last successful regeneration, updates when turning engine off || `01 fc b1` |
 | 24aa | _TODO_ || `00` |
 | 24ab | Reported to be DPF regeneration success status || `00` |
 | 24ac | _TODO_ || `02 23 e2` |
