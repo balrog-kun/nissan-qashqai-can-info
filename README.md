@@ -602,8 +602,7 @@ These are the manufacturer-specific service 22 PID/CIDs that can be queried for 
 | 2448 | [PR636] Reportedly turbo entry pressure | mBar | `03 ac` |
 | 244d | [PR1024] Estimated damper valve upstream temperature, down when engine running then slowly recovers || `0c bd` |
 | 2460 | _Supported PIDs 2461-247f bitmask_ || `ff fc 4b a7` |
-| 2461 | _TODO_ || `00 00 00 03 00 00 00 3c 00 00 00 03 00 00 00 7d 00 00 00 0d 00 00 01 3f 00 00 00 0e 00 00 00 f8 00 00 00 04 00 00` |
-                    00 00 00 11 00 00 00 ce 00 00 00 02 00 00 00 24 00 00 00 02 00 00 00 3f 00 00 00 11 00 00 00 f1 00 00 00 04 00 00
+| 2461 | _TODO_ || `00 00 00 03 00 00 00 3c 00 00 00 03 00 00 00 7d 00 00 00 0d 00 00 01 3f 00 00 00 0e 00 00 00 f8 00 00 00 04 00 00` | 00 00 00 11 00 00 00 ce 00 00 00 02 00 00 00 24 00 00 00 02 00 00 00 3f 00 00 00 11 00 00 00 f1 00 00 00 04 00 00
 | 2462 | _TODO_, seems to be a queue, new value occasionally appears in the last 2 bytes and the other bytes are shifted to front || `00 00 00 00 00 00 00 00 00 67 00 3f 00 80 01 4c 01 06` |
 | 2463 | _TODO_ || `ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff` |
 | 2464 | _TODO_ || `00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00` |
