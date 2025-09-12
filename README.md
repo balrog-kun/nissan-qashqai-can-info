@@ -285,6 +285,15 @@ These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **7
 
 Frames with Msg IDs 342 / 512 (two of each) can be seen exchanged by ECUs when ignition is moved from ACC to ON.  See further description in [key.md](key.md).
 
+## Engine ECU remote routines
+
+The service 0x31 is known in UDS as Remote Routine activation.  Like with other SIDs, supported PID bitmasks (in this case supported routine Local IDs) can be queried in groups of 32.  There's only one routine available on the ECU (0x7e0).
+
+| PID | Usage | Captured value |
+| --: | --- | --- |
+| 00 | _Supported PIDs 01-1f bitmask_ | `80 00 00 00` |
+| 01 | Strongly related to key programing.  Sub-function (parameter) `01` related specifically to wiping out all keys and adding one by one.  Not clear if sub-function `00` exists.  Any parameter value >= 2 makes the routine not respond with either success of failure reply.  Some more info in [key.md](key.md). ||
+
 ## Standard service 01 PIDs (current data)
 
 This is the supported subset of the standard ECU service 01 PIDs just as [described on wikipedia](https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01).  I captured the values with the engine off, ignition in ON on my 2013 manual transmission diesel J10.  Any PIDs not listed here seem to be unsupported.  The queries are sent to the address **7e0** and the replies are returned from address **7e8**.
