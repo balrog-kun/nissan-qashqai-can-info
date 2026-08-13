@@ -187,13 +187,13 @@ Most PID/CIDs support values 0 (off) and 1 (on).  For function `0x00` requesting
 | --: | :-: | --- |
 | 00 || _Supported PIDs 01-1f bitmask_: `32 20 c6 81` |
 | 03 | `00` | 0: nothing, 1 & 2: _TODO_ -- beeps like the lock/unlock switch and a relay action can be heard from the BCM |
-| 04 | `20` | 0, 1, 2: _TODO_ |
+| 04 | `20` | 0: Lock/unlock switch light off for 7s, 1: Lock/unlock switch light on for 7s  |
 | 07 | `00` | 0: nothing, 1: Lock doors, 2: Unlock all doors, 3: Unlock driver door, 4: Unlock passenger doors |
 | 0b | `20` | 0: Rear window defogging (defrost) off for 5s, 1: Rear window defogging (defrost) on for 5s |
 | 11 | `20` | 0: Key beep off, 1: Key beep continuous tone for 5s |
 | 12 | `20` | 0: Key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
 | 16 | `20` | 0: key beep off, 1: Key beep 4 short tones repeating for 5s (5 times) |
-| 17 | `20` | 0: Roof light on for 5s, 1: Roof light on for 5s (same?) |
+| 17 | `20` | 0: Interior (roof+footwell+trunk) lights off for 5s, 1: Interior lights on for 5s |
 | 19 | `20` | 0: Roof light off, 1: Roof light on for 5s, 2: Roof light auto mode? in ACC on for 5s, in ON fade out and off for 5s |
 | 20 || _Supported PIDs 21-3f bitmask_: `84 00 00 6d` |
 | 21 | `20` | 0: No-key dashboard light off for 5s, 1: No-key dashboard light on for 5s |
@@ -211,12 +211,13 @@ Most PID/CIDs support values 0 (off) and 1 (on).  For function `0x00` requesting
 | 69 || MISSING |
 | 77 | `20` | 0: Check oil dashboard light off for 5s, 1: Check oil dashboard light on for 5s |
 | 78 | `20` | 0, 1: _TODO_ |
+TODO: does 77 have a mode 2??
 
 ## Engine ECU diagnostic action PIDs (commands)
 
 The engine computer seems to have its own service 0x30 to trigger diagnostic actions, with a similar syntax to the BCM's service 0x30.  The service 0x30 commands as well as the diagnostic session request (`02 10 c0`) now need to be sent to address **7e0** instead of **745**.  The function byte is always `00` and the value byte is apparently ignored, so the functions and values are not listed below.
 
-These commands can't be used when the engine is running, error `22` (conditionsNotCorrect) is returned if they're attempted with the engine running.  Similarly some of the commands return error `22` if a previous related command is still in effect.  The PID/CIDs may be specific to the K9K engine or a subset of engines.
+These commands can't be used when the engine is running, error `22` (conditionsNotCorrect) is returned if they're attempted with the engine running.  Similarly some of the commands return error `22` if a previous related command is still in effect.  The ECU is off with ignition in OFF or ACC.  The PID/CIDs may be specific to the K9K engine or a subset of engines.
 
 | PID | Action |
 | --: | --- |
@@ -268,7 +269,7 @@ Some or all of these may correspond to test commands (_TODO: find matches_), not
 
 ## IPDM-E/R diagnostic action PIDs (commands)
 
-These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **74d**.  Like before diagnostic session `0xc0` required.
+These are the diagnostic PIDs/CIDs for the IPDM-E/R ECU (or BCM?) at address **74d**.  Like before, diagnostic session `0xc0` required.  This ECU is dead if the BCM is off.  Additionally some or all of the commands will return error 22 unless some as yet unidentified relay is ON.  They always work when ignition is in ON, but may work or not with ignition in ACC.
 
 | PID | Function (`0x00`/`0x20`) | Values |
 | --: | :-: | --- |
@@ -292,7 +293,7 @@ The service 0x31 is known in UDS as Remote Routine activation.  Like with other 
 | PID | Usage | Captured value |
 | --: | --- | --- |
 | 00 | _Supported PIDs 01-1f bitmask_ | `80 00 00 00` |
-| 01 | Strongly related to key programing.  Sub-function (parameter) `01` related specifically to wiping out all keys and adding one by one.  Not clear if sub-function `00` exists.  Any parameter value >= 2 makes the routine not respond with either success of failure reply.  Some more info in [key.md](key.md). ||
+| 01 | Strongly related to key programing.  Sub-function (parameter) `01` related specifically to wiping out all keys and adding one by one.  Not clear if sub-function `00` exists.  Any parameter value >= 2 makes the routine not respond with either success of failure reply.  `00` and `01` at least trigger an error reply under various test conditions.  Some more info in [key.md](key.md). ||
 
 ## Standard service 01 PIDs (current data)
 
